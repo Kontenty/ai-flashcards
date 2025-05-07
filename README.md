@@ -1,48 +1,103 @@
-# Astro Starter Kit: Basics
+# 10x Flashcards
 
-```sh
-pnpm create astro@latest -- --template basics
+![Version](https://img.shields.io/badge/version-0.0.1-blue)
+![Build Status](https://github.com/<owner>/<repo>/actions/workflows/ci.yml/badge.svg)
+![License](https://img.shields.io/badge/license-unlicensed-lightgrey)
+
+## Description
+
+10x Flashcards is a web application designed to streamline and accelerate the creation of high-quality educational flashcards by combining AI-powered generation with manual editing and management capabilities. This MVP enables users to generate flashcards from pasted text, manually create, review, edit, and delete flashcards, manage user accounts with GDPR compliance, assign tags, view statistics, and conduct spaced repetition sessions using the SM-2 algorithm.
+
+## Tech Stack
+
+- **Frontend:** Astro 5.7.11, React 19.1.0
+- **Styling:** Tailwind CSS 4.1.5, Shadcn/ui
+- **Backend:** Supabase (Auth, PostgreSQL, Storage)
+- **AI Integration:** Openrouter.ai (OpenAI API wrapper)
+- **CI/CD:** GitHub Actions
+- **Hosting:** DigitalOcean (Docker)
+- **Language:** TypeScript
+- **Linting:** ESLint
+
+## Table of Contents
+
+- [Getting Started Locally](#getting-started-locally)
+- [Available Scripts](#available-scripts)
+- [Project Scope](#project-scope)
+- [Project Status](#project-status)
+- [License](#license)
+
+## Getting Started Locally
+
+### Prerequisites
+
+- Node.js v22.15.0 (nvm, Volta)
+- Supabase project with URL and ANON key
+- Openrouter.ai or OpenAI API key
+
+### Installation
+
+```bash
+git clone https://github.com/<owner>/<repo>.git
+cd 10x-flashcards
+npm install
 ```
 
-[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/withastro/astro/tree/latest/examples/basics)
-[![Open with CodeSandbox](https://assets.codesandbox.io/github/button-edit-lime.svg)](https://codesandbox.io/p/sandbox/github/withastro/astro/tree/latest/examples/basics)
-[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/withastro/astro?devcontainer_path=.devcontainer/basics/devcontainer.json)
+### Environment Variables
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+Create a `.env` in the root:
 
-![just-the-basics](https://github.com/withastro/astro/assets/2244813/a0a5533c-a856-4198-8470-2d67b1d7c554)
-
-## 🚀 Project Structure
-
-Inside of your Astro project, you'll see the following folders and files:
-
-```text
-/
-├── public/
-│   └── favicon.svg
-├── src/
-│   ├── layouts/
-│   │   └── Layout.astro
-│   └── pages/
-│       └── index.astro
-└── package.json
+```
+SUPABASE_URL=your_supabase_url
+SUPABASE_ANON_KEY=your_supabase_anon_key
+OPENROUTER_API_KEY=your_openrouter_api_key
+# or OPENAI_API_KEY=your_openai_api_key
 ```
 
-To learn more about the folder structure of an Astro project, refer to [our guide on project structure](https://docs.astro.build/en/basics/project-structure/).
+### Running the App
 
-## 🧞 Commands
+```bash
+npm run dev
+```
 
-All commands are run from the root of the project, from a terminal:
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `pnpm install`             | Installs dependencies                            |
-| `pnpm dev`             | Starts local dev server at `localhost:4321`      |
-| `pnpm build`           | Build your production site to `./dist/`          |
-| `pnpm preview`         | Preview your build locally, before deploying     |
-| `pnpm astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `pnpm astro -- --help` | Get help using the Astro CLI                     |
+## Available Scripts
 
-## 👀 Want to learn more?
+- `npm run dev` - Start the development server
+- `npm run build` - Build production assets
+- `npm run preview` - Preview the production build
+- `npm run astro` - Run the Astro CLI
 
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+## Project Scope
+
+### Core Features
+
+- **AI-powered flashcard generation:** Generate flashcards from up to 5000 characters of input text (front ≤200 chars, back ≤500 chars).
+- **Manual flashcard CRUD:** Create, view, edit, and delete flashcards with character limits.
+- **User authentication:** Sign up, log in with email/password, and GDPR consent.
+- **Tag management & statistics:** Assign tags and view statistics (flashcards per tag, recall rates).
+- **Spaced repetition:** Conduct review sessions with the SM-2 algorithm.
+
+### Out of Scope
+
+- File imports (PDF, DOCX, etc.).
+- Deck sharing or export.
+- External educational platform integrations.
+- Native mobile applications.
+- Advanced repetition algorithms beyond SM-2.
+- Additional security measures beyond GDPR compliance.
+
+## Project Status
+
+- **Version:** 0.0.1
+- **Status:** MVP in active development
+- **Metrics Tracked:**
+  - AI flashcard acceptance rate
+  - Percentage of flashcards generated via AI
+  - Monthly active users
+  - Average AI generation latency and usage
+
+## License
+
+This project is currently unlicensed. Please add a `LICENSE` file to specify terms.
