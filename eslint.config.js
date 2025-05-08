@@ -1,52 +1,65 @@
-import js from "@eslint/js";
-import globals from "globals";
-import tseslint from "typescript-eslint";
-import pluginReact from "eslint-plugin-react";
-import css from "@eslint/css";
-import { defineConfig } from "eslint/config";
-import eslintPluginAstro from "eslint-plugin-astro";
-import hooks from "eslint-plugin-react-hooks";
-import importPlugin from "eslint-plugin-import";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 
-export default defineConfig([
-  ...eslintPluginAstro.configs.recommended,
-  importPlugin.flatConfigs.recommended,
-  hooks.flatConfigs.recommended,
-  {
-    files: ["**/*.{js,mjs,cjs,ts,jsx,tsx}"],
-    plugins: { js },
-    extends: ["js/recommended"],
-    rules: {
-      "import/order": [
-        "error",
-        {
-          groups: [
-            "builtin",
-            "external",
-            "internal",
-            "parent",
-            "sibling",
-            "index",
-          ],
-          "newlines-between": "always",
-          alphabetize: { order: "asc", caseInsensitive: true },
-        },
-      ],
+import { includeIgnoreFile } from "@eslint/compat";
+import eslint from "@eslint/js";
+import { configs as astroConfig } from "eslint-plugin-astro";
+import jsxA11y from "eslint-plugin-jsx-a11y";
+import pluginReact from "eslint-plugin-react";
+import reactCompiler from "eslint-plugin-react-compiler";
+import eslintPluginReactHooks from "eslint-plugin-react-hooks";
+import tseslint from "typescript-eslint";
+
+// File path setup
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const gitignorePath = path.resolve(__dirname, ".gitignore");
+
+const baseConfig = tseslint.config({
+  extends: [eslint.configs.recommended, tseslint.configs.strict, tseslint.configs.stylistic],
+  rules: {
+    "no-console": "warn",
+    "no-unused-vars": "off",
+  },
+});
+
+const jsxA11yConfig = tseslint.config({
+  files: ["**/*.{js,jsx,ts,tsx}"],
+  extends: [jsxA11y.flatConfigs.recommended],
+  languageOptions: {
+    ...jsxA11y.flatConfigs.recommended.languageOptions,
+  },
+  rules: {
+    ...jsxA11y.flatConfigs.recommended.rules,
+  },
+});
+
+const reactConfig = tseslint.config({
+  files: ["**/*.{js,jsx,ts,tsx}"],
+  extends: [pluginReact.configs.flat.recommended],
+  languageOptions: {
+    ...pluginReact.configs.flat.recommended.languageOptions,
+    globals: {
+      window: true,
+      document: true,
     },
   },
-  {
-    files: ["**/*.{js,mjs,cjs,ts,jsx,tsx}"],
-    languageOptions: { globals: globals.browser },
+  plugins: {
+    "react-hooks": eslintPluginReactHooks,
+    "react-compiler": reactCompiler,
   },
-  tseslint.configs.recommended,
-  pluginReact.configs.flat.recommended,
-  {
-    files: ["**/*.css"],
-    plugins: { css },
-    language: "css/css",
-    extends: ["css/recommended"],
+  settings: { react: { version: "detect" } },
+  rules: {
+    ...eslintPluginReactHooks.configs.recommended.rules,
+    "react/react-in-jsx-scope": "off",
+    "react-compiler/react-compiler": "error",
   },
-  {
-    ignores: ["**/dist/", "**/node_modules/", "**/.next/"],
-  },
-]);
+});
+
+export default tseslint.config(
+  includeIgnoreFile(gitignorePath),
+  baseConfig,
+  jsxA11yConfig,
+  reactConfig,
+  astroConfig["flat/recommended"],
+);
