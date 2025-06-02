@@ -1,0 +1,134 @@
+openapi: 3.1.0
+info:
+  title: Flashcard Generation API
+  version: 1.0.0
+  description: API for generating flashcard suggestions using AI
+
+servers:
+  - url: /api
+    description: API base URL
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    GenerateFlashcardsRequest:
+      type: object
+      required:
+        - text
+      properties:
+        text:
+          type: string
+          description: Text to generate flashcards from
+          maxLength: 5000
+          example: "The capital of France is Paris."
+
+    Suggestion:
+      type: object
+      required:
+        - front
+        - back
+      properties:
+        front:
+          type: string
+          description: Question or front side of the flashcard
+          example: "What is the capital of France?"
+        back:
+          type: string
+          description: Answer or back side of the flashcard
+          example: "Paris"
+
+    GenerateFlashcardsResponse:
+      type: object
+      required:
+        - suggestions
+      properties:
+        suggestions:
+          type: array
+          items:
+            $ref: "#/components/schemas/Suggestion"
+
+    Error:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: string
+          description: Error message
+        details:
+          type: object
+          description: Additional error details
+        message:
+          type: string
+          description: Detailed error message
+
+paths:
+  /flashcards/generate:
+    post:
+      summary: Generate flashcard suggestions
+      description: Generates flashcard suggestions based on provided text using AI
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GenerateFlashcardsRequest"
+      responses:
+        "201":
+          description: Flashcards generated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenerateFlashcardsResponse"
+          headers:
+            X-Cache:
+              schema:
+                type: string
+                enum: [HIT, MISS]
+              description: Cache status
+            X-Response-Time:
+              schema:
+                type: string
+              description: Response time in milliseconds
+        "400":
+          description: Invalid request body
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "429":
+          description: Rate limit exceeded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+          headers:
+            Retry-After:
+              schema:
+                type: string
+              description: Time in seconds to wait before retrying
+        "502":
+          description: AI service error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
