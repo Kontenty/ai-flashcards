@@ -70,7 +70,7 @@ export const POST: APIRoute = async ({ request }) => {
     } */
     // TODO: Remove this once authentication is implemented
     const user = {
-      id: "123",
+      id: import.meta.env.USER_ID,
     };
 
     // Apply rate limiting

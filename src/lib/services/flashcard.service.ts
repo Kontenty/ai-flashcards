@@ -1,7 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { CreateFlashcardCommand, FlashcardDetailDto } from "@/types";
-import { Result } from "@/lib/utils/result";
 import type { Database } from "@/db/database.types";
+import { Result } from "@/lib/utils/result";
 
 interface TagWithName {
   tag: {
@@ -26,12 +26,16 @@ export function createFlashcardService(supabase: SupabaseClient<Database>) {
     ): Promise<Result<FlashcardDetailDto, string>> {
       try {
         // Get the current user's ID
-        const {
+        /* const {
           data: { user },
         } = await supabase.auth.getUser();
         if (!user) {
           return Result.error("User not authenticated");
-        }
+        } */
+        // TODO: Remove this once authentication is implemented
+        const user = {
+          id: import.meta.env.USER_ID,
+        };
 
         // Start a transaction
         const { data: flashcard, error: flashcardError } = await supabase

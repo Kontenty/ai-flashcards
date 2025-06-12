@@ -15,6 +15,8 @@ declare global {
 interface ImportMetaEnv {
   readonly SUPABASE_URL: string;
   readonly SUPABASE_KEY: string;
+  // TODO: Remove this once authentication is implemented
+  readonly USER_ID: string;
 }
 
 interface ImportMeta {
