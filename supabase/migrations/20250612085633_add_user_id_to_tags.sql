@@ -1,0 +1,1 @@
+alter table public.tags add column user_id uuid not null references auth.users(id) on delete cascade;
