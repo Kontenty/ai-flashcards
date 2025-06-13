@@ -21,7 +21,7 @@ export class AiService {
     try {
       // TODO: Implement actual AI service integration
       // This is a placeholder implementation that simulates AI processing
-      await new Promise((resolve) => setTimeout(resolve, 100)); // Simulate API call
+      await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate API call
 
       if (text.length < 10) {
         throw new AiServiceError("Text too short for meaningful flashcards", "SERVICE_ERROR");
@@ -29,12 +29,20 @@ export class AiService {
 
       return [
         {
-          front: `Question about: ${text.substring(0, 20)}...`,
+          front: `Question about: ${text.substring(0, 10)}...`,
           back: "Sample answer 1",
         },
         {
           front: "Sample question 2",
           back: "Sample answer 2",
+        },
+        {
+          front: "Sample question 3",
+          back: "Sample answer 3",
+        },
+        {
+          front: "Sample question 4",
+          back: "Sample answer 4",
         },
       ];
     } catch (error) {
