@@ -76,7 +76,7 @@ export function TextInputSection({
           value={text}
           onChange={handleTextChange}
           placeholder="Enter your text here..."
-          className="min-h-[200px] resize-none"
+          className="min-h-[200px] max-h-[400px] resize-none"
           disabled={isGenerating}
           aria-describedby="text-counter"
         />
