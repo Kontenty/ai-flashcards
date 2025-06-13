@@ -43,10 +43,10 @@ export function FlashcardList({ suggestions, onEdit, onReject }: Readonly<Flashc
       // Optimistically clear all suggestions
       suggestions.forEach((_, index) => onReject(index));
 
-      const response = await fetch("/api/flashcards/bulk", {
+      const response = await fetch("/api/flashcards", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ cards }),
+        body: JSON.stringify(cards),
       });
 
       if (!response.ok) {
