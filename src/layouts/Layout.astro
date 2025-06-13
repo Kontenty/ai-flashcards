@@ -17,7 +17,7 @@ const { title } = Astro.props;
 	</head>
 	<body>
 		<slot />
-		<Toaster />
+		<Toaster richColors closeButton client:only="react" />
 	</body>
 </html>
 

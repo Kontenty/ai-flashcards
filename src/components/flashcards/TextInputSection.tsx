@@ -85,13 +85,13 @@ export function TextInputSection({
 
       {(error || localError) && (
         <Alert variant="destructive" role="alert">
-          <AlertDescription>{error || localError}</AlertDescription>
+          <AlertDescription>{error ?? localError}</AlertDescription>
         </Alert>
       )}
 
       <Button
         onClick={handleGenerate}
-        disabled={isGenerating || text.trim().length === 0}
+        disabled={isGenerating || text.trim().length === 0 || text.trim().length > MAX_TEXT_LENGTH}
         className="w-full"
       >
         {isGenerating ? (
