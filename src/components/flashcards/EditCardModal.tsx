@@ -12,9 +12,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import type { SuggestionDto, CreateFlashcardCommand } from "@/types";
-
-const MAX_FRONT_LENGTH = 200;
-const MAX_BACK_LENGTH = 500;
+import { MAX_BACK_LENGTH, MAX_FRONT_LENGTH } from "@/constants";
 
 interface EditCardModalProps {
   isOpen: boolean;

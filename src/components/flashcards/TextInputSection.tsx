@@ -5,8 +5,7 @@ import { Progress } from "@/components/ui/progress";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
-
-const MAX_TEXT_LENGTH = 5000;
+import { MAX_TEXT_LENGTH, MIN_TEXT_LENGTH } from "@/constants";
 
 interface TextInputSectionProps {
   text: string;
@@ -35,6 +34,11 @@ export function TextInputSection({
       setLocalError("Please enter some text to generate flashcards");
       return false;
     }
+    if (text.length < MIN_TEXT_LENGTH) {
+      setLocalError(`Text cannot be shorter than ${MIN_TEXT_LENGTH} characters`);
+      return false;
+    }
+
     if (text.length > MAX_TEXT_LENGTH) {
       setLocalError(`Text cannot be longer than ${MAX_TEXT_LENGTH} characters`);
       return false;

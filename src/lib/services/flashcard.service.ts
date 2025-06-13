@@ -113,6 +113,7 @@ export function createFlashcardService(supabase: SupabaseClient<Database>) {
     ): Promise<Result<FlashcardDetailDto[], string>> {
       try {
         // Get the current user's ID
+        // TODO - add actual authentication
         const user = {
           id: import.meta.env.USER_ID,
         };
