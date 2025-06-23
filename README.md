@@ -50,7 +50,7 @@ Create a `.env` in the root:
 ```
 SUPABASE_URL=your_supabase_url
 SUPABASE_ANON_KEY=your_supabase_anon_key
-OPENROUTER_API_KEY=your_openrouter_api_key
+OPEN_ROUTER_API_KEY=your_OPEN_ROUTER_API_KEY
 # or OPENAI_API_KEY=your_openai_api_key
 ```
 
