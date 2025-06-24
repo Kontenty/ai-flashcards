@@ -1,0 +1,14 @@
+---
+import RegisterForm from "@/components/auth/RegisterForm";
+import Layout from "@/layouts/Layout.astro";
+---
+
+<Layout title="Rejestracja | 10xFlashCards">
+  <main class="w-full max-w-md p-6 bg-white rounded shadow mx-auto mt-12">
+    <h1 class="text-2xl font-bold mb-6 text-center">Załóż konto</h1>
+    <RegisterForm client:load />
+    <div class="mt-4 text-sm text-center">
+      <a href="/login" class="text-blue-600 hover:underline">Masz już konto? Zaloguj się</a>
+    </div>
+  </main>
+</Layout> 

@@ -1,0 +1,15 @@
+---
+import LoginForm from "@/components/auth/LoginForm";
+import Layout from "@/layouts/Layout.astro";
+---
+
+<Layout title="Logowanie | 10xFlashCards">
+  <main class="w-full max-w-md p-6 bg-white rounded shadow mx-auto mt-12">
+    <h1 class="text-2xl font-bold mb-6 text-center">Zaloguj się</h1>
+    <LoginForm client:load />
+    <div class="mt-4 flex justify-between text-sm">
+      <a href="/register" class="text-blue-600 hover:underline">Nie masz konta? Zarejestruj się</a>
+      <a href="/forgot-password" class="text-blue-600 hover:underline">Zapomniałeś hasła?</a>
+    </div>
+  </main>
+</Layout> 
