@@ -67,6 +67,110 @@ components:
           type: string
           description: Detailed error message
 
+    CreateFlashcardRequest:
+      type: object
+      required:
+        - front
+        - back
+        - tagIds
+      properties:
+        front:
+          type: string
+          maxLength: 200
+        back:
+          type: string
+          maxLength: 500
+        tagIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+
+    FlashcardListItem:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        front:
+          type: string
+        back:
+          type: string
+        next_review_date:
+          type: string
+          format: date-time
+        tags:
+          type: array
+          items:
+            type: string
+
+    Pagination:
+      type: object
+      properties:
+        page:
+          type: integer
+        pageSize:
+          type: integer
+        total:
+          type: integer
+
+    FlashcardListResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/FlashcardListItem"
+        pagination:
+          $ref: "#/components/schemas/Pagination"
+
+    FlashcardDetail:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        front:
+          type: string
+        back:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        tags:
+          type: array
+          items:
+            type: string
+
+  responses:
+    BadRequest:
+      description: Invalid request
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    InternalError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+
 paths:
   /flashcards/generate:
     post:
@@ -132,3 +236,151 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
+  /flashcards:
+    get:
+      summary: List flashcards
+      description: Retrieve a paginated list of flashcards with optional tag filtering and search
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            minimum: 1
+          description: Page number (defaults to 1)
+        - in: query
+          name: pageSize
+          schema:
+            type: integer
+            minimum: 1
+          description: Number of items per page (defaults to 20)
+        - in: query
+          name: tags
+          schema:
+            type: array
+            items:
+              type: string
+              format: uuid
+          style: form
+          explode: true
+          description: List of tag IDs to filter
+        - in: query
+          name: search
+          schema:
+            type: string
+          description: Full-text search term for front and back
+      responses:
+        "200":
+          description: Flashcards list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FlashcardListResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/InternalError"
+    post:
+      summary: Create new flashcard(s)
+      description: Create a single flashcard or multiple flashcards
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: "#/components/schemas/CreateFlashcardRequest"
+                - type: array
+                  items:
+                    $ref: "#/components/schemas/CreateFlashcardRequest"
+      responses:
+        "201":
+          description: Flashcard(s) created successfully
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/FlashcardDetail"
+                  - type: array
+                    items:
+                      $ref: "#/components/schemas/FlashcardDetail"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalError"
+  /flashcards/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    get:
+      summary: Get flashcard by ID
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: Flashcard details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FlashcardDetail"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalError"
+    put:
+      summary: Update a flashcard
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateFlashcardRequest"
+      responses:
+        "200":
+          description: Flashcard updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FlashcardDetail"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalError"
+    delete:
+      summary: Delete a flashcard
+      security:
+        - BearerAuth: []
+      responses:
+        "204":
+          description: Flashcard deleted successfully
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalError"
