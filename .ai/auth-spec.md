@@ -10,13 +10,13 @@ Celem jest stworzenie bezpiecznego, wydajnego i skalowalnego rozwiązania, któr
 
 ### 2.1. Nowe Strony (Astro)
 
-W celu obsługi procesów autentykacji, utworzone zostaną następujące strony w katalogu `src/pages/`:
+W celu obsługi procesów autentykacji, utworzone zostaną następujące strony w katalogu `src/pages/auth/`:
 
-- **`src/pages/login.astro`**: Strona logowania. Będzie zawierać komponent `LoginForm` i podstawową strukturę wizualną.
-- **`src/pages/register.astro`**: Strona rejestracji. Będzie osadzać komponent `RegisterForm`.
-- **`src/pages/forgot-password.astro`**: Strona do inicjowania procesu odzyskiwania hasła.
-- **`src/pages/reset-password.astro`**: Strona, na którą użytkownik zostanie przekierowany z maila w celu ustawienia nowego hasła. Będzie ona odczytywać token resetu z parametrów URL.
-- **`src/pages/dashboard.astro`**: Nowy "pulpit użytkownika", który będzie chroniony i dostępny tylko dla zalogowanych użytkowników. Może to być refaktoryzacja istniejącej strony głównej z listą fiszek.
+- **`src/pages/auth/login.astro`**: Strona logowania. Będzie zawierać komponent `LoginForm` i podstawową strukturę wizualną.
+- **`src/pages/auth/register.astro`**: Strona rejestracji. Będzie osadzać komponent `RegisterForm`.
+- **`src/pages/auth/forgot-password.astro`**: Strona do inicjowania procesu odzyskiwania hasła.
+- **`src/pages/auth/reset-password.astro`**: Strona, na którą użytkownik zostanie przekierowany z maila w celu ustawienia nowego hasła. Będzie ona odczytywać token resetu z parametrów URL.
+- **`src/pages/auth/dashboard.astro`**: Nowy "pulpit użytkownika", który będzie chroniony i dostępny tylko dla zalogowanych użytkowników. Może to być refaktoryzacja istniejącej strony głównej z listą fiszek.
 
 ### 2.2. Nowe Komponenty (React)
 
