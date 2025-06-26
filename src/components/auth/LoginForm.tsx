@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -20,11 +20,33 @@ export const LoginForm: React.FC = () => {
     resolver: zodResolver(schema),
   });
 
-  // Placeholder for backend logic
-  const onSubmit = async () => {
-    // TODO: implement login logic
-    // On success: window.location.href = "/dashboard";
+  const [serverError, setServerError] = useState<string | null>(null);
+  const [shouldRedirect, setShouldRedirect] = useState(false);
+
+  const onSubmit = async (data: FormData) => {
+    setServerError(null);
+    const response = await fetch("/api/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    });
+    if (response.redirected) {
+      setShouldRedirect(true);
+      return;
+    }
+    const body = await response.json();
+    if (response.ok) {
+      setShouldRedirect(true);
+    } else {
+      setServerError(body.error || "Coś poszło nie tak");
+    }
   };
+
+  useEffect(() => {
+    if (shouldRedirect) {
+      window.location.href = "/dashboard";
+    }
+  }, [shouldRedirect]);
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 max-w-sm mx-auto">
@@ -54,8 +76,7 @@ export const LoginForm: React.FC = () => {
         />
         {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password.message}</p>}
       </div>
-      {/* Placeholder for global error */}
-      {/* <Alert variant="destructive">Nieprawidłowe dane logowania</Alert> */}
+      {serverError && <p className="text-red-500 text-sm">{serverError}</p>}
       <Button type="submit" className="w-full" disabled={isSubmitting}>
         Zaloguj się
       </Button>

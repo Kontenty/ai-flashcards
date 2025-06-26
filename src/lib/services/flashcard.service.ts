@@ -26,16 +26,12 @@ export function createFlashcardService(supabase: SupabaseClient<Database>) {
     ): Promise<Result<FlashcardDetailDto, string>> {
       try {
         // Get the current user's ID
-        /* const {
+        const {
           data: { user },
         } = await supabase.auth.getUser();
         if (!user) {
           return Result.error("User not authenticated");
-        } */
-        // TODO: Remove this once authentication is implemented
-        const user = {
-          id: import.meta.env.USER_ID,
-        };
+        }
 
         // Start a transaction
         const { data: flashcard, error: flashcardError } = await supabase
@@ -113,10 +109,12 @@ export function createFlashcardService(supabase: SupabaseClient<Database>) {
     ): Promise<Result<FlashcardDetailDto[], string>> {
       try {
         // Get the current user's ID
-        // TODO - add actual authentication
-        const user = {
-          id: import.meta.env.USER_ID,
-        };
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+        if (!user) {
+          return Result.error("User not authenticated");
+        }
 
         // Create all flashcards
         const { data: flashcards, error: flashcardError } = await supabase

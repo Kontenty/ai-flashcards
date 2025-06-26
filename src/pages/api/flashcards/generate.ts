@@ -21,7 +21,7 @@ const securityHeaders = {
 // Cache TTL - 1 hour
 const CACHE_TTL_MS = 60 * 60 * 1000;
 
-export const POST: APIRoute = async ({ request }) => {
+export const POST: APIRoute = async ({ request, locals }) => {
   const startTime = Date.now();
   const requestId = createHash("md5").update(`${Date.now()}-${Math.random()}`).digest("hex");
 
@@ -57,7 +57,7 @@ export const POST: APIRoute = async ({ request }) => {
     }
 
     // Verify authentication
-    /* const {
+    const {
       data: { user },
       error: authError,
     } = await locals.supabase.auth.getUser();
@@ -67,11 +67,7 @@ export const POST: APIRoute = async ({ request }) => {
         status: 401,
         headers: securityHeaders,
       });
-    } */
-    // TODO: Remove this once authentication is implemented
-    const user = {
-      id: import.meta.env.USER_ID,
-    };
+    }
 
     // Apply rate limiting
     try {

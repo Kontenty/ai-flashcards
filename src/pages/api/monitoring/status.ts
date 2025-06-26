@@ -13,7 +13,7 @@ const securityHeaders = {
   "X-XSS-Protection": "1; mode=block",
 };
 
-export const GET: APIRoute = async ({ request, locals }) => {
+export const GET: APIRoute = async ({ locals }) => {
   try {
     // Verify authentication
     const {

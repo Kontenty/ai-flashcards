@@ -6,16 +6,12 @@ export function createTagService(supabase: SupabaseClient) {
     async validateTags(tagIds: string[]): Promise<Result<true, string>> {
       try {
         // Get the current user's ID
-        /* const {
+        const {
           data: { user },
         } = await supabase.auth.getUser();
         if (!user) {
           return Result.error("User not authenticated");
-        } */
-        // TODO: Remove this once authentication is implemented
-        const user = {
-          id: import.meta.env.USER_ID,
-        };
+        }
 
         // Check if all tags exist and belong to the user
         const { data: tags, error } = await supabase

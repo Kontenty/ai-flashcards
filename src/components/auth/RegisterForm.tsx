@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -9,7 +9,7 @@ const schema = z
     email: z.string().email("Nieprawidłowy email"),
     password: z.string().min(8, "Hasło musi mieć co najmniej 8 znaków"),
     confirmPassword: z.string(),
-    rodo: z.literal(true, { errorMap: () => ({ message: "Musisz zaakceptować RODO" }) }),
+    gdpr: z.literal(true, { errorMap: () => ({ message: "Musisz zaakceptować RODO" }) }),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Hasła muszą być takie same",
@@ -27,11 +27,35 @@ export const RegisterForm: React.FC = () => {
     resolver: zodResolver(schema),
   });
 
-  // Placeholder for backend logic
-  const onSubmit = async () => {
-    // TODO: implement register logic
-    // On success: inform user to check email
+  const [serverError, setServerError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
+  const onSubmit = async (data: FormData) => {
+    setServerError(null);
+    setSuccessMessage(null);
+    const response = await fetch("/api/auth/register", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    });
+    const body = await response.json();
+    if (response.ok) {
+      setSuccessMessage(body.message);
+    } else {
+      setServerError(body.error || "Coś poszło nie tak");
+    }
   };
+
+  if (successMessage) {
+    return (
+      <div className="space-y-4 max-w-sm mx-auto text-center">
+        <p className="text-green-600">{successMessage}</p>
+        <Button onClick={() => (window.location.href = "/auth/login")} className="w-full">
+          Przejdź do logowania
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 max-w-sm mx-auto">
@@ -77,14 +101,13 @@ export const RegisterForm: React.FC = () => {
         )}
       </div>
       <div className="flex items-center">
-        <input id="rodo" type="checkbox" {...register("rodo")} className="mr-2" />
-        <label htmlFor="rodo" className="text-sm">
+        <input id="gdpr" type="checkbox" {...register("gdpr")} className="mr-2" />
+        <label htmlFor="gdpr" className="text-sm">
           Akceptuję politykę RODO
         </label>
       </div>
-      {errors.rodo && <p className="text-red-500 text-sm mt-1">{errors.rodo.message}</p>}
-      {/* Placeholder for global error or info */}
-      {/* <Alert variant="default">Sprawdź skrzynkę e-mail, aby potwierdzić rejestrację.</Alert> */}
+      {errors.gdpr && <p className="text-red-500 text-sm mt-1">{errors.gdpr.message}</p>}
+      {serverError && <p className="text-red-500 text-sm">{serverError}</p>}
       <Button type="submit" className="w-full" disabled={isSubmitting}>
         Zarejestruj się
       </Button>
