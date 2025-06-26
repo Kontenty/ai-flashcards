@@ -1,9 +1,10 @@
 ---
 import { Toaster } from "@/components/ui/sonner";
 import "@/styles/global.css";
-
+import UserNav from "@/components/auth/UserNav";
 
 const { title } = Astro.props;
+const user = Astro.locals.user;
 ---
 
 <!doctype html>
@@ -15,8 +16,15 @@ const { title } = Astro.props;
 		<meta name="generator" content={Astro.generator} />
 		<title>{title}</title>
 	</head>
-	<body>
-		<slot />
+	<body class="flex flex-col min-h-screen">
+		<header class="bg-white border-b">
+			<div class="container mx-auto px-4 py-4 flex justify-end">
+				<UserNav user={user} client:only="react" />
+			</div>
+		</header>
+		<main class="flex-1 container mx-auto px-4 py-8">
+			<slot />
+		</main>
 		<Toaster richColors closeButton client:only="react" />
 	</body>
 </html>

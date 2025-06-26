@@ -27,10 +27,9 @@ export const onRequest = defineMiddleware(
     } = await supabase.auth.getUser();
 
     if (user) {
-      // @ts-expect-error assign user data to locals
       locals.user = {
         id: user.id,
-        email: user.email,
+        email: user.email ?? "",
       };
       // If a logged-in user hits an auth page, redirect to dashboard
       if (AUTH_UI_PATHS.includes(url.pathname)) {
