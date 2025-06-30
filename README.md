@@ -18,6 +18,8 @@
 - **Hosting:** DigitalOcean (Docker)
 - **Language:** TypeScript
 - **Linting:** ESLint
+- **Unit testing:** Vitest + React Testing Library
+- **End-to-end testing:** Playwright
 
 ## Table of Contents
 

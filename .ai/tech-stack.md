@@ -4,7 +4,7 @@ Poniżej moja krytyczna, lecz obiektywna analiza zaproponowanego tech-stacku wzg
    • Astro + React: Astro pozwala szybko wystawić statyczne strony, a React da interaktywność tylko tam, gdzie trzeba. Umożliwia to ograniczenie ilości JS i szybsze TTI (time to interactive).  
    • Supabase: gotowe BaaS (auth, DB, storage) niemal „out-of-the-box” – znacznie przyspiesza development backendu.  
    • Openrouter.ai: uniwersalny wrapper do modeli AI, ale wymaga dodatkowej integracji. Można rozważyć prostszy start bezpośrednio na OpenAI API, by jeszcze bardziej przyspieszyć.  
-   • GitHub Actions + DigitalOcean: standardowe i sprawdzone w małych projektach. Konfiguracja pipeline’u będzie prosta.  
+   • GitHub Actions + DigitalOcean: standardowe i sprawdzone w małych projektach. Konfiguracja pipeline'u będzie prosta.  
    Wniosek: stack pozwoli szybko postawić MVP, choć integracja Openrouter.ai może wymagać kilku iteracji.
 
 2. Skalowalność  
@@ -28,7 +28,7 @@ Poniżej moja krytyczna, lecz obiektywna analiza zaproponowanego tech-stacku wzg
    Wniosek: dla MVP można rozważyć uproszczenie- albo zacząć czystym Astro + vanilla React albo Next.js (pełne SSR/SSG + API routes) i dopiero potem rozbudowywać.
 
 5. Prostsze podejścia  
-   • Next.js z wbudowanymi API-routes i NextAuth do auth​ – szybki „full-stack” bez zewnętrznego BaaS.  
+   • Next.js z wbudowanymi API-routes i NextAuth do auth – szybki „full-stack” bez zewnętrznego BaaS.  
    • Bezpośrednie użycie OpenAI Node SDK zamiast Openrouter.ai – mniej punktów awarii, prostsza integracja.  
    • Vercel lub Netlify zamiast DigitalOcean – natywne CI/CD, zero-config deploy.  
    Wniosek: takie opcje mogą skrócić czas i obniżyć złożoność, kosztem mniejszej kontroli nad infrastrukturą.
@@ -39,5 +39,9 @@ Poniżej moja krytyczna, lecz obiektywna analiza zaproponowanego tech-stacku wzg
    • Każda integracja AI wymaga zabezpieczenia kluczy (np. w sekretach GitHub Actions).  
    • Docker na DO wymaga dbałości o aktualizacje OS i obrazu.  
    Wniosek: technologia pozwala osiągnąć wysoki poziom bezpieczeństwa, ale wymaga dobrej konfiguracji oraz polityki backupów i RLS.
+
+7. Narzędzia testowe  
+   • Testy jednostkowe: Vitest + React Testing Library  
+   • Testy end-to-end: Playwright
 
 Podsumowując, zaproponowany stack dobrze odpowiada na większość wymagań PRD i pozwala szybko wystartować z MVP. Jednocześnie warto rozważyć drobne uproszczenia (np. Next.js czy prostsze AI-API) by zmniejszyć złożoność i przyspieszyć development przy zachowaniu skalowalności i bezpieczeństwa.
