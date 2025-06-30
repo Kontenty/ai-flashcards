@@ -1,0 +1,10 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import ListFlashcardsView from "@/components/flashcards/ListFlashcardsView";
+---
+
+<Layout>
+  <div class="px-4 py-6">
+    <ListFlashcardsView client:load />
+  </div>
+</Layout> 
