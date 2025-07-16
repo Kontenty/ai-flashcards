@@ -42,7 +42,7 @@
 ```bash
 git clone https://github.com/<owner>/<repo>.git
 cd 10x-flashcards
-npm install
+pnpm install
 ```
 
 ### Environment Variables
@@ -59,17 +59,21 @@ OPEN_ROUTER_API_KEY=your_OPEN_ROUTER_API_KEY
 ### Running the App
 
 ```bash
-npm run dev
+pnpm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ## Available Scripts
 
-- `npm run dev` - Start the development server
-- `npm run build` - Build production assets
-- `npm run preview` - Preview the production build
-- `npm run astro` - Run the Astro CLI
+- `pnpm run dev` - Start the development server
+- `pnpm run build` - Build production assets
+- `pnpm run preview` - Preview the production build
+- `pnpm run astro` - Run the Astro CLI
+- `pnpm run test:unit` - Run unit tests with Vitest
+- `pnpm run test:unit:watch` - Run unit tests in watch mode
+- `pnpm run test:coverage` - Generate test coverage report
+- `pnpm run test:e2e` - Run end-to-end tests with Playwright
 
 ## Project Scope
 
