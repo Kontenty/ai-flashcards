@@ -24,4 +24,8 @@ pnpm-debug.log*
 # jetbrains setting folder
 .idea/
 
+# playwright data
+test-results/
+playwright/.auth/
+
 .ai/prompts
