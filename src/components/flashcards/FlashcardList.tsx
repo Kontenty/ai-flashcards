@@ -55,6 +55,7 @@ export function FlashcardList({ suggestions, onEdit, onReject }: Readonly<Flashc
       }
 
       toast.success(`Saved ${cards.length} flashcards successfully`);
+      window.location.href = "/flashcards";
     } catch (err) {
       // Revert optimistic update on error
       originalSuggestions.forEach((_, index) => {
@@ -95,9 +96,10 @@ export function FlashcardList({ suggestions, onEdit, onReject }: Readonly<Flashc
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4" data-testid="flashcard-list">
       <div className="flex justify-end">
         <Button
+          data-testid="flashcard-list-save-all"
           onClick={() => setShowBulkSaveConfirm(true)}
           disabled={isSaving}
           className="flex items-center gap-2"
@@ -108,33 +110,44 @@ export function FlashcardList({ suggestions, onEdit, onReject }: Readonly<Flashc
       </div>
 
       {error && (
-        <Alert variant="destructive" role="alert">
+        <Alert variant="destructive" role="alert" data-testid="flashcard-list-error">
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       )}
 
       {suggestions.map((suggestion, index) => (
-        <Card key={index} className="relative">
+        <Card key={index} className="relative" data-testid={`flashcard-card-${index}`}>
           <CardContent className="pt-6">
             <div className="space-y-4">
               <div>
                 <h3 className="font-semibold mb-2">Front</h3>
-                <p className="text-muted-foreground">{suggestion.front}</p>
+                <p className="text-muted-foreground" data-testid={`flashcard-front-${index}`}>
+                  {suggestion.front}
+                </p>
               </div>
               <div>
                 <h3 className="font-semibold mb-2">Back</h3>
-                <p className="text-muted-foreground">{suggestion.back}</p>
+                <p className="text-muted-foreground" data-testid={`flashcard-back-${index}`}>
+                  {suggestion.back}
+                </p>
               </div>
             </div>
           </CardContent>
           <CardFooter className="flex justify-end space-x-2">
-            <Button variant="outline" size="sm" onClick={() => onEdit(index)} disabled={isSaving}>
+            <Button
+              variant="outline"
+              size="sm"
+              data-testid={`flashcard-edit-button-${index}`}
+              onClick={() => onEdit(index)}
+              disabled={isSaving}
+            >
               <Pencil className="h-4 w-4 mr-2" />
               Edit
             </Button>
             <Button
               variant="destructive"
               size="sm"
+              data-testid={`flashcard-reject-button-${index}`}
               onClick={() => handleReject(index)}
               disabled={isSaving}
             >
@@ -146,7 +159,7 @@ export function FlashcardList({ suggestions, onEdit, onReject }: Readonly<Flashc
       ))}
 
       <AlertDialog open={rejectIndex !== null} onOpenChange={() => setRejectIndex(null)}>
-        <AlertDialogContent>
+        <AlertDialogContent data-testid="flashcard-reject-dialog">
           <AlertDialogHeader>
             <AlertDialogTitle>Reject Flashcard</AlertDialogTitle>
             <AlertDialogDescription>
@@ -154,14 +167,19 @@ export function FlashcardList({ suggestions, onEdit, onReject }: Readonly<Flashc
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmReject}>Reject</AlertDialogAction>
+            <AlertDialogCancel data-testid="alert-dialog-cancel">Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              data-testid="flashcard-reject-dialog-confirm"
+              onClick={confirmReject}
+            >
+              Reject
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
 
       <AlertDialog open={showBulkSaveConfirm} onOpenChange={setShowBulkSaveConfirm}>
-        <AlertDialogContent>
+        <AlertDialogContent data-testid="flashcard-bulk-save-dialog">
           <AlertDialogHeader>
             <AlertDialogTitle>Save All Flashcards</AlertDialogTitle>
             <AlertDialogDescription>
@@ -170,8 +188,15 @@ export function FlashcardList({ suggestions, onEdit, onReject }: Readonly<Flashc
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleBulkSave}>Save All</AlertDialogAction>
+            <AlertDialogCancel data-testid="flashcard-bulk-save-dialog-cancel">
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              data-testid="flashcard-bulk-save-dialog-confirm"
+              onClick={handleBulkSave}
+            >
+              Save All
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

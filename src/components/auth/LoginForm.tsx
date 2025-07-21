@@ -60,6 +60,7 @@ export const LoginForm: React.FC = () => {
           autoComplete="email"
           {...register("email")}
           className="w-full border rounded px-3 py-2"
+          data-testid="login-email"
         />
         {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>}
       </div>
@@ -73,11 +74,12 @@ export const LoginForm: React.FC = () => {
           autoComplete="current-password"
           {...register("password")}
           className="w-full border rounded px-3 py-2"
+          data-testid="login-password"
         />
         {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password.message}</p>}
       </div>
       {serverError && <p className="text-red-500 text-sm">{serverError}</p>}
-      <Button type="submit" className="w-full" disabled={isSubmitting}>
+      <Button type="submit" className="w-full" disabled={isSubmitting} data-testid="login-submit">
         Zaloguj się
       </Button>
     </form>

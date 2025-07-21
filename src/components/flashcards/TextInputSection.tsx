@@ -97,6 +97,7 @@ export function TextInputSection({
         onClick={handleGenerate}
         disabled={isGenerating || text.trim().length === 0 || text.trim().length > MAX_TEXT_LENGTH}
         className="w-full"
+        data-testid="generate-flashcards-button"
       >
         {isGenerating ? (
           <>
