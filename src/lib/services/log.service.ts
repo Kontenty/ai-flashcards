@@ -54,10 +54,13 @@ export class LogService {
 
     // In production, you might want to send logs to a service like Sentry or DataDog
     if (level === "error") {
+      // eslint-disable-next-line no-console
       console.error(message, metadata);
     } else if (level === "warn") {
+      // eslint-disable-next-line no-console
       console.warn(message, metadata);
     } else {
+      // eslint-disable-next-line no-console
       console.log(message, metadata);
     }
   }

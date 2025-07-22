@@ -22,9 +22,7 @@ export const POST: APIRoute = async ({ request, locals, redirect }) => {
   }
 
   const body = await request.json();
-  console.log("🚀 ~ constPOST:APIRoute= ~ body:", body);
   const result = schema.safeParse(body);
-  console.log("🚀 ~ constPOST:APIRoute= ~ result:", result);
   if (!result.success) {
     const firstError = result.error.errors[0];
     return new Response(JSON.stringify({ error: firstError.message }), { status: 400 });
