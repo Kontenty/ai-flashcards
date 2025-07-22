@@ -20,15 +20,24 @@ describe("FlashcardList", () => {
   ];
   let onEdit: ReturnType<typeof vi.fn>;
   let onReject: ReturnType<typeof vi.fn>;
+  let onBulkSaveSuccess: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
     onEdit = vi.fn();
     onReject = vi.fn();
+    onBulkSaveSuccess = vi.fn();
     vi.clearAllMocks();
   });
 
   it("displays empty state when no suggestions", () => {
-    render(<FlashcardList suggestions={[]} onEdit={onEdit} onReject={onReject} />);
+    render(
+      <FlashcardList
+        suggestions={[]}
+        onEdit={onEdit}
+        onReject={onReject}
+        onBulkSaveSuccess={onBulkSaveSuccess}
+      />,
+    );
     expect(
       screen.getByText(
         /No flashcards generated yet\. Enter some text and click "Generate Flashcards" to get started\./i,
@@ -37,14 +46,28 @@ describe("FlashcardList", () => {
   });
 
   it("calls onEdit with correct index when Edit button is clicked", () => {
-    render(<FlashcardList suggestions={suggestions} onEdit={onEdit} onReject={onReject} />);
+    render(
+      <FlashcardList
+        suggestions={suggestions}
+        onEdit={onEdit}
+        onReject={onReject}
+        onBulkSaveSuccess={onBulkSaveSuccess}
+      />,
+    );
     const editButtons = screen.getAllByRole("button", { name: /edit/i });
     fireEvent.click(editButtons[1]);
     expect(onEdit).toHaveBeenCalledWith(1);
   });
 
   it("opens and confirms reject dialog, then calls onReject and shows toast", async () => {
-    render(<FlashcardList suggestions={suggestions} onEdit={onEdit} onReject={onReject} />);
+    render(
+      <FlashcardList
+        suggestions={suggestions}
+        onEdit={onEdit}
+        onReject={onReject}
+        onBulkSaveSuccess={onBulkSaveSuccess}
+      />,
+    );
     const rejectButtons = screen.getAllByRole("button", { name: /reject/i });
     fireEvent.click(rejectButtons[0]);
     // Confirm dialog opens
@@ -65,7 +88,14 @@ describe("FlashcardList", () => {
       vi.fn(() => Promise.resolve({ ok: true } as Response)),
     );
 
-    render(<FlashcardList suggestions={suggestions} onEdit={onEdit} onReject={onReject} />);
+    render(
+      <FlashcardList
+        suggestions={suggestions}
+        onEdit={onEdit}
+        onReject={onReject}
+        onBulkSaveSuccess={onBulkSaveSuccess}
+      />,
+    );
     // Open bulk save confirmation
     const saveAllBtn = screen.getByRole("button", { name: /save all/i });
     fireEvent.click(saveAllBtn);
@@ -88,6 +118,7 @@ describe("FlashcardList", () => {
       // Optimistic clears call onReject for each index
       expect(onReject).toHaveBeenCalledTimes(2);
       expect(toast.success).toHaveBeenCalledWith("Saved 2 flashcards successfully");
+      expect(onBulkSaveSuccess).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -103,7 +134,14 @@ describe("FlashcardList", () => {
       ),
     );
 
-    render(<FlashcardList suggestions={suggestions} onEdit={onEdit} onReject={onReject} />);
+    render(
+      <FlashcardList
+        suggestions={suggestions}
+        onEdit={onEdit}
+        onReject={onReject}
+        onBulkSaveSuccess={onBulkSaveSuccess}
+      />,
+    );
     // Open bulk save confirmation
     const saveAllBtn = screen.getByRole("button", { name: /save all/i });
     fireEvent.click(saveAllBtn);

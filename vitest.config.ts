@@ -4,9 +4,11 @@ import viteTsconfigPaths from "vite-tsconfig-paths";
 export default defineConfig({
   plugins: [viteTsconfigPaths()],
   test: {
-    environment: "jsdom",
     globals: true,
-    setupFiles: "tests/setup.ts",
+    environment: "jsdom",
+    setupFiles: ["./tests/setup.ts"],
+    include: ["tests/unit/**/*.test.{js,mjs,cjs,ts,mts,cts,jsx,tsx}"],
+    exclude: ["tests/e2e/**", "node_modules/**"],
     coverage: {
       provider: "istanbul",
       reporter: ["text", "lcov"],

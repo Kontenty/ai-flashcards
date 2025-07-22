@@ -20,9 +20,15 @@ interface FlashcardListProps {
   suggestions: SuggestionDto[];
   onEdit: (index: number) => void;
   onReject: (index: number) => void;
+  onBulkSaveSuccess: () => void;
 }
 
-export function FlashcardList({ suggestions, onEdit, onReject }: Readonly<FlashcardListProps>) {
+export function FlashcardList({
+  suggestions,
+  onEdit,
+  onReject,
+  onBulkSaveSuccess,
+}: Readonly<FlashcardListProps>) {
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [rejectIndex, setRejectIndex] = useState<number | null>(null);
@@ -55,7 +61,7 @@ export function FlashcardList({ suggestions, onEdit, onReject }: Readonly<Flashc
       }
 
       toast.success(`Saved ${cards.length} flashcards successfully`);
-      window.location.href = "/flashcards";
+      onBulkSaveSuccess();
     } catch (err) {
       // Revert optimistic update on error
       originalSuggestions.forEach((_, index) => {

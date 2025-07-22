@@ -90,6 +90,9 @@ export function GenerateFlashcardsView() {
             setSuggestions((prev) => prev.filter((_, i) => i !== index));
             toast.success("Flashcard rejected");
           }}
+          onBulkSaveSuccess={() => {
+            window.location.href = "/flashcards";
+          }}
         />
       )}
 
