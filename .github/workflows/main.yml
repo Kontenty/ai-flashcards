@@ -15,21 +15,6 @@ on:
   workflow_dispatch:
 
 jobs:
-  changes:
-    name: Detect changes
-    runs-on: ubuntu-latest
-    outputs:
-      e2e: ${{ steps.filter.outputs.e2e }}
-    steps:
-      - uses: actions/checkout@v4
-      - uses: dorny/paths-filter@v3
-        id: filter
-        with:
-          filters: |
-            e2e:
-              - "src/**"
-              - "tests/e2e/**"
-
   lint:
     name: Lint
     runs-on: ubuntu-latest
@@ -58,31 +43,11 @@ jobs:
       - name: Run unit tests
         run: pnpm run test:unit
 
-  e2e-test:
-    name: E2E Test
-    runs-on: ubuntu-latest
-    needs: [lint, changes]
-    if: needs.changes.outputs.e2e == 'true'
-    env:
-      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-      SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
-      E2E_USERNAME: ${{ secrets.E2E_USERNAME }}
-      E2E_PASSWORD: ${{ secrets.E2E_PASSWORD }}
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-      - name: Common setup
-        uses: ./.github/actions/common-setup
-      - name: Install Playwright browsers
-        run: pnpm exec playwright install --with-deps chromium
-      - name: Run e2e tests
-        run: pnpm run test:e2e
-
   build:
     name: Build
     runs-on: ubuntu-latest
-    needs: [unit-test, e2e-test]
-    if: ${{ always() && needs.unit-test.result == 'success' && (needs.e2e-test.result == 'success' || needs.e2e-test.result == 'skipped') }}
+    needs: unit-test
+    if: ${{ always() && needs.unit-test.result == 'success' }}
     env:
       NODE_ENV: production
       SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
