@@ -11,6 +11,8 @@ jobs:
     name: Lint
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
       - name: Common setup
         uses: ./.github/actions/common-setup
       - name: Lint code
@@ -20,6 +22,8 @@ jobs:
     name: Unit Tests
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
       - name: Common setup
         uses: ./.github/actions/common-setup
       - name: Run unit tests
@@ -34,6 +38,8 @@ jobs:
       E2E_USERNAME: ${{ secrets.E2E_USERNAME }}
       E2E_PASSWORD: ${{ secrets.E2E_PASSWORD }}
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
       - name: Common setup
         uses: ./.github/actions/common-setup
       - name: Install Playwright browsers
