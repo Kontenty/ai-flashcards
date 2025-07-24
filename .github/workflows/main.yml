@@ -70,6 +70,9 @@ jobs:
   deploy:
     name: Deploy to Cloudflare
     environment: production
+    permissions:
+      contents: read
+      deployments: write
     runs-on: ubuntu-latest
     needs: [lint, unit-test, build]
     if: ${{ always() && needs.lint.result == 'success' && needs.unit-test.result == 'success' && needs.build.result == 'success' }}
@@ -88,6 +91,7 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
           command: pages deploy dist --project-name=ai-flashcards
           secrets: |
             CLOUDFLARE_API_TOKEN
