@@ -1,10 +1,16 @@
+/* eslint-env node */
+/* eslint-disable no-undef */
 // @ts-check
 import { defineConfig } from "astro/config";
 
 import react from "@astrojs/react";
 import sitemap from "@astrojs/sitemap";
 import tailwindcss from "@tailwindcss/vite";
+import node from "@astrojs/node";
 import cloudflare from "@astrojs/cloudflare";
+
+// Determine if running in CI environment
+const isCI = Boolean(process.env.CI);
 
 // https://astro.build/config
 export default defineConfig({
@@ -14,5 +20,5 @@ export default defineConfig({
   vite: {
     plugins: [tailwindcss()],
   },
-  adapter: cloudflare(),
+  adapter: isCI ? node({ mode: "standalone" }) : cloudflare(),
 });
