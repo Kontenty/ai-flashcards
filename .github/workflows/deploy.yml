@@ -1,7 +1,7 @@
-name: Pull Request CI
+name: Deploy to Cloudflare Pages
 
 on:
-  pull_request:
+  push:
     branches:
       - main
   workflow_dispatch:
@@ -29,20 +29,21 @@ jobs:
       - name: Run unit tests
         run: pnpm run test:unit
 
-  e2e-test:
-    name: E2E Tests
+  deploy:
+    name: Deploy to Cloudflare
     runs-on: ubuntu-latest
-    env:
-      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-      SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
-      E2E_USERNAME: ${{ secrets.E2E_USERNAME }}
-      E2E_PASSWORD: ${{ secrets.E2E_PASSWORD }}
+    needs: [lint, unit-test]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
       - name: Common setup
         uses: ./.github/actions/common-setup
-      - name: Install Playwright browsers
-        run: pnpm exec playwright install --with-deps chromium
-      - name: Run e2e tests
-        run: pnpm run test:e2e
+      - name: Build application
+        run: pnpm run build
+      - name: Publish to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          projectName: ai-flashcards
+          directory: dist
