@@ -1,5 +1,3 @@
-/* eslint-env node */
-/* eslint-disable no-undef */
 // @ts-check
 import { defineConfig } from "astro/config";
 
@@ -7,10 +5,18 @@ import react from "@astrojs/react";
 import sitemap from "@astrojs/sitemap";
 import tailwindcss from "@tailwindcss/vite";
 import node from "@astrojs/node";
-import cloudflare from "@astrojs/cloudflare";
+import cloudflareAstro from "@astrojs/cloudflare";
 
 // Determine if running in Playwright tests (not deployment)
-const isTesting = Boolean(process.env.PLAYWRIGHT_TEST);
+// eslint-disable-next-line no-undef
+const useNode = Boolean(process.env.PLAYWRIGHT_TEST);
+const cloudflareAdapter = cloudflareAstro({
+  platformProxy: {
+    enabled: true,
+  },
+
+  imageService: "cloudflare",
+});
 
 // https://astro.build/config
 export default defineConfig({
@@ -19,6 +25,15 @@ export default defineConfig({
   server: { port: 4321 },
   vite: {
     plugins: [tailwindcss()],
+    resolve: {
+      // Use react-dom/server.edge instead of react-dom/server.browser for React 19.
+      // Without this, MessageChannel from node:worker_threads needs to be polyfilled.
+      alias: useNode
+        ? undefined
+        : {
+            "react-dom/server": "react-dom/server.edge",
+          },
+    },
   },
-  adapter: isTesting ? node({ mode: "standalone" }) : cloudflare(),
+  adapter: useNode ? node({ mode: "standalone" }) : cloudflareAdapter,
 });

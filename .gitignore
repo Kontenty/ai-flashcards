@@ -17,6 +17,7 @@ pnpm-debug.log*
 .env
 .env.production
 .env.test
+.dev.vars
 
 # macOS-specific files
 .DS_Store
@@ -29,3 +30,4 @@ test-results/
 playwright/.auth/
 
 .ai/prompts
+worker-startup.cpuprofile
