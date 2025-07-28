@@ -15,12 +15,12 @@ if (!storageStateExists) {
 
 const webServer = process.env.CI
   ? {
-      command: "PLAYWRIGHT_TEST=true pnpm build && PLAYWRIGHT_TEST=true pnpm preview",
+      command: "pnpm build --mode test && pnpm preview --mode test",
       url: "http://localhost:4321",
       timeout: 180 * 1000, // Longer timeout for build + preview
     }
   : {
-      command: "PLAYWRIGHT_TEST=true pnpm dev:e2e",
+      command: "pnpm dev:e2e",
       url: "http://localhost:4321",
       reuseExistingServer: true,
     };
