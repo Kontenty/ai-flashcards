@@ -2,7 +2,7 @@ name: Deploy on CI Success
 
 on:
   workflow_run:
-    workflows: ["Pull Request CI"] # must match the “name:” of your CI workflow
+    workflows: ["main CI/CD pipeline"] # must match the “name:” of your CI workflow
     types: [completed]
 
 jobs:
