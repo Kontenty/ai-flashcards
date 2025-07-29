@@ -2,10 +2,12 @@ name: Deploy on CI Success
 
 on:
   workflow_run:
-    workflows: ["main CI/CD pipeline"] # must match the “name:” of your CI workflow
-    types: [completed]
+    workflows:
+      - main CI/CD pipeline
+    types:
+      - completed
     branches:
-      - clouflare-deploy
+      - main
 
 jobs:
   deploy:
