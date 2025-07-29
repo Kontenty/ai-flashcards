@@ -4,6 +4,9 @@ on:
   workflow_run:
     workflows: ["main CI/CD pipeline"] # must match the “name:” of your CI workflow
     types: [completed]
+    branches:
+      - main
+      - clouflare-deploy
 
 jobs:
   deploy:
