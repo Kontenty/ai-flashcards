@@ -1,7 +1,7 @@
 // src/types.ts
 // Data Transfer Objects (DTOs) and Command Models for the API
 
-import type { Tables, TablesInsert } from "./db/database.types";
+import type { Tables, TablesInsert } from "@/db/database.types";
 
 // --------------------
 // Authentication

@@ -32,3 +32,6 @@ playwright/.auth/
 
 .ai/prompts
 worker-startup.cpuprofile
+
+# test
+**/__snapshots__/
