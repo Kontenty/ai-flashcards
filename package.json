@@ -15,8 +15,8 @@
     "test:unit": "vitest",
     "test:unit:watch": "vitest --watch",
     "test:coverage": "vitest --coverage",
-    "test:e2e": "cross-env MODE=test playwright test",
-    "test:e2e:debug": "cross-env MODE=test playwright test --debug"
+    "test:e2e": "cross-env NODE_ENV=test playwright test",
+    "test:e2e:debug": "cross-env NODE_ENV=test playwright test --debug"
   },
   "dependencies": {
     "@astrojs/node": "^9.2.2",
