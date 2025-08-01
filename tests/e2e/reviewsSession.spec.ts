@@ -16,6 +16,9 @@ test.describe("Reviews Session E2E Tests", () => {
       });
     });
     const response = await page.goto("/api/reviews/session");
+    if (!response) {
+      throw new Error("Navigation to /api/reviews/session failed");
+    }
     expect(response.status()).toBe(200);
     const data = await response.json();
     expect(data).toEqual({
@@ -28,6 +31,9 @@ test.describe("Reviews Session E2E Tests", () => {
       await route.fulfill({ status: 204, body: "" });
     });
     const response = await page.goto("/api/reviews/session");
+    if (!response) {
+      throw new Error("Navigation to /api/reviews/session failed");
+    }
     expect(response.status()).toBe(204);
   });
 
@@ -40,6 +46,9 @@ test.describe("Reviews Session E2E Tests", () => {
       });
     });
     const response = await page.goto("/api/reviews/session");
+    if (!response) {
+      throw new Error("Navigation to /api/reviews/session failed");
+    }
     expect(response.status()).toBe(401);
     const errorJson = await response.json();
     expect(errorJson.error).toBe("Unauthorized");

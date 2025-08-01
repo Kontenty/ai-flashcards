@@ -15,6 +15,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import type { SuggestionDto, CreateFlashcardCommand } from "@/types";
+import { getStringField } from "@/lib/utils";
 
 interface FlashcardListProps {
   suggestions: SuggestionDto[];
@@ -57,7 +58,7 @@ export function FlashcardList({
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => null);
-        throw new Error(errorData?.message || "Failed to save flashcards");
+        throw new Error(getStringField(errorData, "message", "Failed to save flashcards"));
       }
 
       toast.success(`Saved ${cards.length} flashcards successfully`);

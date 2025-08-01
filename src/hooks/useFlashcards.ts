@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import type { FlashcardListItemDto, PaginationDto } from "@/types";
+import { getStringField } from "@/lib/utils";
 
 export interface FilterState {
   page: number;
@@ -31,7 +32,7 @@ export function useFlashcards(initialFilter: FilterState) {
       const res = await fetch(`/api/flashcards?${params.toString()}`);
       if (!res.ok) {
         const json = await res.json();
-        throw new Error(json.message || res.statusText);
+        throw new Error(getStringField(json, "message", res.statusText));
       }
       const data: { items: FlashcardListItemDto[]; pagination: PaginationDto } = await res.json();
       setItems(data.items);

@@ -11,6 +11,7 @@ import FlashcardTable from "./FlashcardTable";
 import PaginationControls from "./PaginationControls";
 import { EditCardModal } from "./EditCardModal";
 import DeleteConfirmDialog from "./DeleteConfirmDialog";
+import { getStringField } from "@/lib/utils";
 
 const ListFlashcardsView: React.FC = () => {
   // Initial filter state
@@ -44,7 +45,7 @@ const ListFlashcardsView: React.FC = () => {
       const res = await fetch(`/api/flashcards/${id}`);
       if (!res.ok) {
         const json = await res.json();
-        throw new Error(json.message || res.statusText);
+        throw new Error(getStringField(json, "message", res.statusText));
       }
       const data = (await res.json()) as { front: string; back: string };
       setSelectedFlashcard({ id, front: data.front, back: data.back, tagIds: [] });
@@ -73,7 +74,7 @@ const ListFlashcardsView: React.FC = () => {
       const res = await fetch(`/api/flashcards/${toDeleteId}`, { method: "DELETE" });
       if (!res.ok) {
         const json = await res.json();
-        throw new Error(json.message || res.statusText);
+        throw new Error(getStringField(json, "message", res.statusText));
       }
       toast.success("Flashcard deleted successfully");
       reload();
@@ -129,7 +130,7 @@ const ListFlashcardsView: React.FC = () => {
             });
             if (!res.ok) {
               const json = await res.json();
-              throw new Error(json.message || res.statusText);
+              throw new Error(getStringField(json, "message", res.statusText));
             }
             toast.success("Flashcard saved successfully");
             reload();

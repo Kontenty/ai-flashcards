@@ -15,7 +15,7 @@ export const GET: APIRoute = async ({ locals }) => {
   try {
     const result = await statsService.getTagStats(user.id);
 
-    if (result.isErr) {
+    if (result.isError) {
       console.error(result.error);
       return new Response(JSON.stringify({ message: "An unexpected error occurred." }), {
         status: 500,

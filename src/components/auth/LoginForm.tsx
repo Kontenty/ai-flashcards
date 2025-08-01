@@ -3,6 +3,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Button } from "../ui/button";
+import { getStringField } from "@/lib/utils";
 
 const schema = z.object({
   email: z.string().email("Nieprawidłowy email"),
@@ -38,7 +39,7 @@ export const LoginForm: React.FC = () => {
     if (response.ok) {
       setShouldRedirect(true);
     } else {
-      setServerError(body.error || "Coś poszło nie tak");
+      setServerError(getStringField(body, "error", "Coś poszło nie tak"));
     }
   };
 

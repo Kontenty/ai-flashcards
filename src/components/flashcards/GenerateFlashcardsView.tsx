@@ -11,6 +11,7 @@ import type {
   SuggestionDto,
   CreateFlashcardCommand,
 } from "@/types";
+import { getStringField } from "@/lib/utils";
 
 const initialEditCardState = {
   isOpen: false,
@@ -38,7 +39,7 @@ export function GenerateFlashcardsView() {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => null);
-        throw new Error(errorData?.message ?? "Failed to generate flashcards");
+        throw new Error(getStringField(errorData, "message", "Failed to generate flashcards"));
       }
 
       const data: GenerateFlashcardsResponseDto = await response.json();

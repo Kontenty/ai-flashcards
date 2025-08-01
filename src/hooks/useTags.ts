@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import type { TagDto } from "@/types";
+import { getStringField } from "@/lib/utils";
 
 export interface TagOption {
   id: string;
@@ -20,7 +21,7 @@ export function useTags() {
       const res = await fetch(`/api/tags?${params.toString()}`);
       if (!res.ok) {
         const json = await res.json();
-        throw new Error(json.message || res.statusText);
+        throw new Error(getStringField(json, "message", res.statusText));
       }
       const data: TagDto[] = await res.json();
       setOptions(data);
@@ -46,7 +47,7 @@ export function useTags() {
       });
       if (!res.ok) {
         const json = await res.json();
-        throw new Error(json.message || res.statusText);
+        throw new Error(getStringField(json, "message", res.statusText));
       }
       const newTag: TagDto = await res.json();
       const tagOption: TagOption = { id: newTag.id, name: newTag.name };
@@ -71,7 +72,7 @@ export function useTags() {
       });
       if (!res.ok) {
         const json = await res.json();
-        throw new Error(json.message || res.statusText);
+        throw new Error(getStringField(json, "message", res.statusText));
       }
       const updatedTag: TagDto = await res.json();
       const tagOption: TagOption = { id: updatedTag.id, name: updatedTag.name };
@@ -94,7 +95,7 @@ export function useTags() {
       });
       if (!res.ok) {
         const json = await res.json();
-        throw new Error(json.message || res.statusText);
+        throw new Error(getStringField(json, "message", res.statusText));
       }
       setOptions((prev) => prev.filter((tag) => tag.id !== id));
     } catch (err) {
