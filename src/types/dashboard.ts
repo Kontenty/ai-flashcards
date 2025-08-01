@@ -15,7 +15,8 @@ export interface StatsTileVm {
 export interface ActionVm {
   label: string; // e.g. "Generuj AI"
   icon: ReactNode;
-  href: string;
+  href?: string;
+  onClick?: () => void;
 }
 
 export interface ActivityPoint {

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useDashboardData } from "@/hooks/useDashboardData";
 import { StatsWidgets } from "./StatsWidgets";
 import { QuickActions } from "./QuickActions";
@@ -8,9 +8,11 @@ import { DueFlashcardsList } from "./DueFlashcardsList";
 import { Toaster } from "@/components/ui/sonner";
 import { Button } from "@/components/ui/button";
 import { Plus, Zap, Repeat } from "lucide-react";
+import { CreateFlashcardModal } from "@/components/flashcards/CreateFlashcardModal";
 
 export function DashboardView() {
   const { data, loading, error, reload } = useDashboardData();
+  const [showCreateModal, setShowCreateModal] = useState(false);
 
   if (loading) {
     return (
@@ -54,7 +56,11 @@ export function DashboardView() {
 
   const actions = [
     { label: "Generuj AI", icon: <Zap className="h-4 w-4" />, href: "/flashcards/generate" },
-    { label: "Dodaj fiszkę", icon: <Plus className="h-4 w-4" />, href: "/flashcards" },
+    {
+      label: "Dodaj fiszkę",
+      icon: <Plus className="h-4 w-4" />,
+      onClick: () => setShowCreateModal(true),
+    },
     { label: "Rozpocznij powtórkę", icon: <Repeat className="h-4 w-4" />, href: "/reviews" },
   ];
 
@@ -74,6 +80,11 @@ export function DashboardView() {
         <DueFlashcardsList items={data.due} />
       </div>
       <Toaster />
+      <CreateFlashcardModal
+        open={showCreateModal}
+        onClose={() => setShowCreateModal(false)}
+        onCreated={reload}
+      />
     </>
   );
 }
