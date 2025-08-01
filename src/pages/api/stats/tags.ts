@@ -1,5 +1,5 @@
 import type { APIRoute } from "astro";
-import { createStatsService } from "@/lib/services/stats.service";
+import { createTagService } from "@/lib/services/tag.service";
 
 export const prerender = false;
 
@@ -10,10 +10,10 @@ export const GET: APIRoute = async ({ locals }) => {
     return new Response(JSON.stringify({ message: "Unauthorized" }), { status: 401 });
   }
 
-  const statsService = createStatsService(supabase);
+  const tagService = createTagService(supabase);
 
   try {
-    const result = await statsService.getTagStats(user.id);
+    const result = await tagService.list();
 
     if (result.isError) {
       console.error(result.error);

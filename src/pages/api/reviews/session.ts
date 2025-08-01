@@ -7,7 +7,7 @@ import { logService } from "@/lib/services/log.service";
 export const prerender = false;
 
 // Handler for review session (due cards)
-export const GET: APIRoute = async ({ request, locals }) => {
+export const GET: APIRoute = async ({ locals }) => {
   if (!locals.user?.id) {
     return new Response(JSON.stringify({ error: "Unauthorized" }), {
       status: 401,
@@ -16,25 +16,7 @@ export const GET: APIRoute = async ({ request, locals }) => {
   }
   const userId = locals.user.id;
   try {
-    const url = new URL(request.url);
-    const historyParam = url.searchParams.get("history");
-    let history: boolean | undefined;
-    if (historyParam !== null) {
-      if (historyParam === "true") {
-        history = true;
-      } else if (historyParam === "false") {
-        history = false;
-      } else {
-        return new Response(JSON.stringify({ error: "Invalid history parameter" }), {
-          status: 400,
-          headers: { "Content-Type": "application/json" },
-        });
-      }
-    }
-    const cards = await reviewService.getDueCards(userId, { history });
-    if (cards.length === 0) {
-      return new Response(null, { status: 204 });
-    }
+    const cards = await reviewService.getDueCards(userId);
     const response: ReviewSessionResponseDto = { cards };
     return new Response(JSON.stringify(response), {
       status: 200,

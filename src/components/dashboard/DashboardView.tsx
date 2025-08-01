@@ -50,7 +50,6 @@ export function DashboardView() {
     {
       label: "Tagów",
       value: data.tagStats.length,
-      tooltip: data.tagStats.map((t) => `${t.tag}: ${t.count}`).join(", "),
     },
   ];
 
