@@ -240,8 +240,16 @@ export function createFlashcardService(supabase: SupabaseClient<Database>) {
         if (query.tags && query.tags.length > 0) {
           builder = builder.in("flashcard_tags.tag_id", query.tags);
         }
+
+        // Apply sorting if provided
+        if (query.orderBy) {
+          const [column, direction] = query.orderBy.split(":");
+          builder = builder.order(column, { ascending: direction.toLowerCase() !== "desc" });
+        }
+
         const from = (page - 1) * pageSize;
         const to = page * pageSize - 1;
+
         const { data: flashcards, count, error } = await builder.range(from, to);
         if (error) {
           return Result.error("Failed to list flashcards: " + error.message);
@@ -255,7 +263,15 @@ export function createFlashcardService(supabase: SupabaseClient<Database>) {
           next_review_date: f.next_review_date,
           tags: f.tags.map((t) => t.tag.name),
         }));
-        return Result.ok({ items, pagination: { page, pageSize, total: count ?? items.length } });
+        return Result.ok({
+          items,
+          pagination: {
+            page,
+            pageSize,
+            totalItems: count ?? items.length,
+            totalPages: Math.ceil((count ?? items.length) / pageSize),
+          },
+        });
       } catch (error) {
         return Result.error(error instanceof Error ? error.message : "Unknown error occurred");
       }
