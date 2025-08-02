@@ -1,214 +1,197 @@
-// src/types.ts
-// Data Transfer Objects (DTOs) and Command Models for the API
+// src/types/types.dto.ts
+// Data Transfer Objects (DTOs) and Command Models generated from the database
+// schema (src/db/database.types.ts) and the REST API contract described in
+// .ai/api-plan.md. All DTOs should be treated as **wire-formats** – they map one-to-one
+// to the JSON shape exchanged over the network. Where the database uses snake_case
+// column names the corresponding DTO keeps the same casing for clarity and to
+// minimise the need for runtime mapping.
+//
+// NOTE: Always derive the structural part of the DTO from the canonical
+// database types (Tables / TablesInsert) so that when the schema changes we get
+// compile-time feedback.
 
 import type { Tables, TablesInsert } from "@/db/database.types";
 
-// --------------------
-// Authentication
-// --------------------
+/* -------------------------------------------------------------------------- */
+/*                                 1. AUTH                                   */
+/* -------------------------------------------------------------------------- */
 
-/**
- * Request payload for user registration
- */
+/** Request payload for user registration */
 export interface RegisterRequestDto {
   email: string;
   password: string;
+  /** GDPR/RODO consent flag – must be explicitly accepted */
   rodo_accepted: boolean;
 }
 
-/**
- * Authenticated user representation in responses
- */
+/** Minimal user representation returned from auth endpoints */
 export interface AuthUserDto {
   id: string;
   email?: string;
 }
 
-/**
- * Response payload after successful registration
- */
+/** Response after successful registration */
 export interface RegisterResponseDto {
   user: AuthUserDto;
   access_token: string;
 }
 
-/**
- * Request payload for user login
- */
+/** Login payload */
 export type LoginRequestDto = Pick<RegisterRequestDto, "email" | "password">;
 
-/**
- * Response payload after successful login
- */
+/** Response after successful login */
 export interface LoginResponseDto {
   access_token: string;
   user: Pick<AuthUserDto, "id">;
 }
 
-// --------------------
-// Flashcards
-// --------------------
+/* -------------------------------------------------------------------------- */
+/*                              2. FLASHCARDS                                 */
+/* -------------------------------------------------------------------------- */
 
-/**
- * Query parameters for listing flashcards
- */
+/** Basic tag representation reused across many DTOs */
+export type TagDto = Pick<Tables<"tags">, "id" | "name">;
+
+/** Query parameters accepted by GET /api/flashcards */
 export type FlashcardListQueryDto = Partial<{
   page: number;
   pageSize: number;
-  tags: string[]; // array of tag IDs
+  /** Array of tag UUIDs – returns cards that have *all* of the tags */
+  tags: string[];
+  /** Full-text search term */
   search: string;
+  /** Sorting parameter in the format 'column:direction', e.g. 'created_at:desc' */
+  orderBy: string;
 }>;
 
-/**
- * Pagination information for list responses
- */
+/** Pagination metadata embedded in list responses */
 export interface PaginationDto {
   page: number;
   pageSize: number;
-  total: number;
+  totalItems: number;
+  totalPages: number;
 }
 
-/**
- * Single flashcard item in list responses
- */
+/** Single item inside FlashcardListResponseDto.items */
 export type FlashcardListItemDto = Pick<
   Tables<"flashcards">,
   "id" | "front" | "back" | "next_review_date"
 > & {
-  tags: string[]; // list of tag names
+  tags: TagDto[];
 };
 
-/**
- * Response payload for listing flashcards
- */
+/** Success payload for GET /api/flashcards */
 export interface FlashcardListResponseDto {
   items: FlashcardListItemDto[];
   pagination: PaginationDto;
 }
 
-/**
- * Command model for creating a flashcard
- */
+/** Command used by POST /api/flashcards */
 export type CreateFlashcardCommand = Pick<TablesInsert<"flashcards">, "front" | "back"> & {
+  /** List of tag UUIDs to associate with the card */
   tagIds: TablesInsert<"flashcard_tags">["tag_id"][];
 };
 
-/**
- * Command model for updating a flashcard
- */
+/** Command used by PUT /api/flashcards/{id} */
 export type UpdateFlashcardCommand = CreateFlashcardCommand;
 
-/**
- * Detailed flashcard representation for single-item responses
- */
-export type FlashcardDetailDto = Omit<
+/** Detailed representation returned by GET /api/flashcards/{id} */
+export type FlashcardDetailDto = Pick<
   Tables<"flashcards">,
-  "user_id" | "ease_factor" | "interval" | "next_review_date" | "source" | "tsv"
+  "id" | "front" | "back" | "created_at" | "updated_at"
 > & {
-  tags: string[]; // list of tag names
+  tags: TagDto[];
 };
 
-// --------------------
-// AI Generation
-// --------------------
+/* -------------------------------------------------------------------------- */
+/*                          3. AI FLASHCARD GENERATION                        */
+/* -------------------------------------------------------------------------- */
 
-/**
- * Request payload for generating flashcards via AI
- */
+/** Request payload for POST /api/flashcards/generate */
 export interface GenerateFlashcardsRequestDto {
+  /** Source text (≤ 5 000 chars) */
   text: string;
 }
 
-/**
- * Suggestion returned by AI for a single flashcard
- */
+/** Single suggestion object returned by the AI */
 export type SuggestionDto = Pick<FlashcardDetailDto, "front" | "back">;
 
-/**
- * Response payload containing AI-generated suggestions
- */
+/** Success payload for POST /api/flashcards/generate */
 export interface GenerateFlashcardsResponseDto {
   suggestions: SuggestionDto[];
 }
 
-// --------------------
-// Tags
-// --------------------
+/* -------------------------------------------------------------------------- */
+/*                                   4. TAGS                                  */
+/* -------------------------------------------------------------------------- */
 
-/**
- * Representation of a tag in responses
- */
-export type TagDto = Pick<Tables<"tags">, "id" | "name">;
+/** Query params for GET /api/tags */
+export type TagQueryDto = Partial<{ search: string }>;
 
-/**
- * Query parameters for searching tags
- */
-export type TagQueryDto = Partial<
-  Pick<TagDto, "name"> & {
-    search: string;
-  }
->;
-
-/**
- * Command model for creating a tag
- */
+/** Command payload for POST /api/tags */
 export type CreateTagCommand = Pick<TablesInsert<"tags">, "name">;
 
-/**
- * Command model for updating a tag
- */
+/** Command payload for PUT /api/tags/{id} */
 export type UpdateTagCommand = CreateTagCommand;
 
-// --------------------
-// Reviews (SM-2)
-// --------------------
+/* -------------------------------------------------------------------------- */
+/*                               5. REVIEWS (SM-2)                            */
+/* -------------------------------------------------------------------------- */
 
-/**
- * Single flashcard in a review session
- */
-export type ReviewCardDto = Pick<Tables<"flashcards">, "id" | "front" | "interval" | "ease_factor">;
+/** Card object inside the review session response */
+export type ReviewCardDto = Pick<Tables<"flashcards">, "id" | "front" | "back">;
 
-/**
- * Response payload for fetching today's review session
- */
+/** Success payload for GET /api/reviews/session */
 export interface ReviewSessionResponseDto {
   cards: ReviewCardDto[];
 }
 
-/**
- * Request payload for submitting a review result
- */
+/** Payload for POST /api/flashcards/{id}/review */
 export interface ReviewRequestDto {
-  flashcardId: string;
-  rating: number;
+  /** Integer 0‒5 indicating recall quality */
+  quality: number;
 }
 
-/**
- * Response payload after processing a review result
- */
+/** Success payload returned by the review endpoint */
 export interface ReviewResponseDto {
-  flashcardId: string;
-  nextReviewDate: Tables<"flashcards">["next_review_date"];
-  interval: Tables<"flashcards">["interval"];
-  easeFactor: Tables<"flashcards">["ease_factor"];
+  message: string;
 }
 
-// --------------------
-// Statistics
-// --------------------
+/* -------------------------------------------------------------------------- */
+/*                                6. STATISTICS                               */
+/* -------------------------------------------------------------------------- */
 
-/**
- * Tag usage statistic
- */
-export interface TagStatisticDto {
-  tag: TagDto["name"];
-  count: number;
+/** Row representing a single day in the activity chart */
+export interface DailyReviewStatDto {
+  reviewDate: string; // ISO YYYY-MM-DD
+  cardsReviewed: number;
+  meanQuality: number;
 }
 
-/**
- * Overall performance statistics
- */
+/** Overall performance stats returned by GET /api/stats/performance */
 export interface PerformanceStatsDto {
-  totalReviewed: number;
-  correctPercent: number;
+  totalReviews: number;
+  correctPercentage: number;
+  /** Present only when the caller asks for the breakdown */
+  dailyStats?: DailyReviewStatDto[];
 }
+
+/** Aggregated usage count for a single tag */
+export interface TagStatisticDto {
+  tagId: string;
+  tagName: string;
+  cardCount: number;
+}
+
+/** Success payload for GET /api/stats/tags */
+export interface TagStatsResponseDto {
+  totalTags?: number;
+  byTag?: TagStatisticDto[];
+}
+
+/* -------------------------------------------------------------------------- */
+/*                                 RE-EXPORTS                                 */
+/* -------------------------------------------------------------------------- */
+
+// In most places we import from "@/types" (barrel); the barrel in src/types/index.ts
+// re-exports everything from this file, so no additional work is necessary.
