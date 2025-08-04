@@ -16,7 +16,7 @@ import { getStringField } from "@/lib/utils";
 
 const ListFlashcardsView: React.FC = () => {
   // Initial filter state
-  const initialFilter: FilterState = { page: 1, pageSize: 20, tags: [], search: "" };
+  const initialFilter: FilterState = { page: 1, pageSize: 10, tags: [], search: "" };
   const { items, pagination, filter, setFilter, reload } = useFlashcards(initialFilter);
   const { options: tagOptions, createTag } = useTags();
 
