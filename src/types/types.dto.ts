@@ -139,7 +139,10 @@ export type UpdateTagCommand = CreateTagCommand;
 /* -------------------------------------------------------------------------- */
 
 /** Card object inside the review session response */
-export type ReviewCardDto = Pick<Tables<"flashcards">, "id" | "front" | "back">;
+export type ReviewCardDto = Pick<
+  Tables<"flashcards">,
+  "id" | "front" | "back" | "ease_factor" | "interval"
+>;
 
 /** Success payload for GET /api/reviews/session */
 export interface ReviewSessionResponseDto {
@@ -163,7 +166,7 @@ export interface ReviewResponseDto {
 
 /** Row representing a single day in the activity chart */
 export interface DailyReviewStatDto {
-  reviewDate: string; // ISO YYYY-MM-DD
+  reviewDate: string | null; // ISO YYYY-MM-DD
   cardsReviewed: number;
   meanQuality: number;
 }

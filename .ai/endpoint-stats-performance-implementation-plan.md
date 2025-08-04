@@ -10,7 +10,7 @@ Punkt końcowy zwraca skonsolidowane statystyki skuteczności użytkownika w sys
   - `dailyStats` – (opcjonalnie) zestawienie dzienne dla bieżącego tygodnia.
 - Dane pobierane są w całości z bazy danych Supabase przy użyciu:
   - widoku `daily_review_stats` (dzienne zestawienie),
-  - funkcji RPC `get_performance_stats(p_user_id UUID)` (agregaty globalne).
+  - widoku `get_performance_stats` (agregaty globalne).
 
 ## 2. Szczegóły żądania
 
@@ -19,7 +19,7 @@ Punkt końcowy zwraca skonsolidowane statystyki skuteczności użytkownika w sys
 - **Query params**:
   - `include` _(string, opcjonalny)_ – lista pól do zwrócenia; obsługiwane wartości:
     - `daily_stats` – dołącza szczegółowe statystyki dzienne.
-    - Domyślnie zwracane są tylko `totalReviews` i `correctPercentage`.
+    - Domyślnie zwracane są tylko `total_reviews` i `correct_percentage`.
 - **Ciało żądania**: brak
 - **Nagłówki**: `Authorization: Bearer <JWT>` (wymagany)
 
@@ -49,13 +49,19 @@ Punkt końcowy zwraca skonsolidowane statystyki skuteczności użytkownika w sys
 | 401 | Brak/niepoprawny JWT                         | `{ message: "Unauthorized" }`          |
 | 500 | Błąd serwera / DB                            | `{ message: "Internal server error" }` |
 
-Przykład **200 OK** (z `dailyStats`):
+Przykład **200 OK** (z `daily_stats`):
 
 ```json
 {
-  "totalReviews": 250,
-  "correctPercentage": 88.5,
-  "dailyStats": [{ "reviewDate": "2025-06-16", "cardsReviewed": 15, "meanQuality": 4.25 }]
+  "total_reviews": 250,
+  "correct_percentage": 88.5,
+  "daily_stats": [
+    {
+      "review_date": "2025-06-16",
+      "cards_reviewed": 15,
+      "mean_quality": 4.25
+    }
+  ]
 }
 ```
 
@@ -68,7 +74,7 @@ Przykład **200 OK** (z `dailyStats`):
    3. Wywołuje `statsService.getPerformanceStats(user.id, { includeDaily })`.
 3. `StatsService`:
    1. Równolegle:
-      - `supabase.rpc('get_performance_stats', { p_user_id: userId })` → agregaty.
+      - `supabase.from('get_performance_stats').select('total_reviews,correct_percentage')` → agregaty globalne.
       - (jeśli `includeDaily`) `supabase.from('daily_review_stats').select()` → dzienne dane.
    2. Mapuje surowe wyniki na `PerformanceStatsDto`.
 4. Handler buduje odpowiedź JSON i zwraca `200`.
@@ -80,6 +86,7 @@ Przykład **200 OK** (z `dailyStats`):
 - **Walidacja danych** – Zod zabezpiecza przed nieprawidłowymi parametrami zapytania.
 - **Brak wstrzyknięć SQL** – użycie supabase-js i RPC.
 - **Rate limiting** – opcjonalnie zaimplementować w middleware (np. 60 req/min).
+- **Dostęp do widoku** – `GRANT SELECT ON get_performance_stats TO authenticated` zapewnia dostęp tylko dla uwierzytelnionych użytkowników.
 
 ## 7. Obsługa błędów
 
@@ -115,7 +122,9 @@ Przykład **200 OK** (z `dailyStats`):
        opts: { includeDaily?: boolean } = {},
      ): Promise<Result<PerformanceStatsDto, string>> => {
        try {
-         const aggPromise = db.rpc("get_performance_stats", { p_user_id: userId });
+         const aggPromise = db
+           .from("get_performance_stats")
+           .select("total_reviews,correct_percentage");
          const dailyPromise = opts.includeDaily
            ? db.from("daily_review_stats").select("review_date,cards_reviewed,mean_quality")
            : Promise.resolve({ data: null });

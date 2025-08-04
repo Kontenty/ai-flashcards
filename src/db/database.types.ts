@@ -7,10 +7,10 @@ export interface Database {
     Functions: {
       graphql: {
         Args: {
+          query?: string;
+          variables?: Json;
           extensions?: Json;
           operationName?: string;
-          variables?: Json;
-          query?: string;
         };
         Returns: Json;
       };
@@ -158,6 +158,13 @@ export interface Database {
           cards_reviewed: number | null;
           mean_quality: number | null;
           review_date: string | null;
+        };
+        Relationships: [];
+      };
+      get_performance_stats: {
+        Row: {
+          correct_percentage: number | null;
+          total_reviews: number | null;
         };
         Relationships: [];
       };

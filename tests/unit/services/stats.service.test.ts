@@ -1,10 +1,18 @@
 import { describe, it, expect, vi } from "vitest";
 import { createStatsService } from "@/lib/services/stats.service";
+import type { Mock } from "vitest";
 
 function createSupabaseStub() {
   const builder = {
     select: vi.fn(),
-  } as unknown as Record<string, any>;
+  } as unknown as {
+    select: Mock<
+      (...args: string[]) => Promise<{
+        data: { review_date: string; cards_reviewed: number; mean_quality: number }[] | null;
+        error: { message: string } | null;
+      }>
+    >;
+  };
 
   const supabase = {
     rpc: vi.fn(),
@@ -18,9 +26,11 @@ describe("StatsService.getPerformanceStats", () => {
   it("returns aggregated stats without daily data", async () => {
     const { supabase } = createSupabaseStub();
 
-    supabase.rpc = vi.fn().mockResolvedValue({
-      data: [{ total_reviews: 12, correct_percentage: 75.5 }],
-      error: null,
+    supabase.from = vi.fn().mockReturnValue({
+      select: vi.fn().mockResolvedValue({
+        data: [{ total_reviews: 12, correct_percentage: 75.5 }],
+        error: null,
+      }),
     });
 
     // ensure daily query not executed
@@ -40,13 +50,15 @@ describe("StatsService.getPerformanceStats", () => {
   it("includes daily stats when requested", async () => {
     const { supabase, builder } = createSupabaseStub();
 
-    supabase.rpc = vi.fn().mockResolvedValue({
-      data: [{ total_reviews: 2, correct_percentage: 50 }],
-      error: null,
+    supabase.from = vi.fn().mockReturnValue({
+      select: vi.fn().mockResolvedValue({
+        data: [{ total_reviews: 2, correct_percentage: 50 }],
+        error: null,
+      }),
     });
 
     // Mock daily stats query
-    (builder.select as any).mockResolvedValueOnce({
+    builder.select.mockResolvedValueOnce({
       data: [
         {
           review_date: "2025-06-17",
@@ -72,9 +84,11 @@ describe("StatsService.getPerformanceStats", () => {
   it("returns Result.error when RPC fails", async () => {
     const { supabase } = createSupabaseStub();
 
-    supabase.rpc = vi.fn().mockResolvedValue({
-      data: null,
-      error: { message: "rpc fail" },
+    supabase.from = vi.fn().mockReturnValue({
+      select: vi.fn().mockResolvedValue({
+        data: null,
+        error: { message: "rpc fail" },
+      }),
     });
 
     const service = createStatsService(supabase);
@@ -87,13 +101,15 @@ describe("StatsService.getPerformanceStats", () => {
   it("returns Result.error when daily query fails", async () => {
     const { supabase, builder } = createSupabaseStub();
 
-    supabase.rpc = vi.fn().mockResolvedValue({
-      data: [{ total_reviews: 0, correct_percentage: 0 }],
-      error: null,
+    supabase.from = vi.fn().mockReturnValue({
+      select: vi.fn().mockResolvedValue({
+        data: [{ total_reviews: 0, correct_percentage: 0 }],
+        error: null,
+      }),
     });
 
-    (builder.select as any).mockResolvedValueOnce({
-      data: null,
+    builder.select.mockResolvedValueOnce({
+      data: [],
       error: { message: "view error" },
     });
 

@@ -7,6 +7,7 @@ import { useTags } from "@/hooks/useTags";
 import SearchBar from "./SearchBar";
 import TagFilter from "./TagFilter";
 import StatsOverview from "./StatsOverview";
+import type { TagStatisticDto } from "@/types";
 import FlashcardTable from "./FlashcardTable";
 import PaginationControls from "./PaginationControls";
 import { EditCardModal } from "./EditCardModal";
@@ -96,17 +97,24 @@ const ListFlashcardsView: React.FC = () => {
       />
       {/* Compute overview stats */}
       {(() => {
-        const totalReviewed = pagination.total;
-        const correctPercent = 0; // Placeholder until review data available
+        const totalReviews = pagination.totalItems;
+        const correctPercentage = 0; // Placeholder until review data available
         // Compute tag usage counts
-        const tagCountMap: Record<string, number> = {};
+        const tagCountMap = new Map<string, { tagName: string; cardCount: number }>();
         items.forEach((item) => {
           item.tags.forEach((tag) => {
-            tagCountMap[tag] = (tagCountMap[tag] || 0) + 1;
+            const entry = tagCountMap.get(tag.id);
+            if (entry) {
+              entry.cardCount += 1;
+            } else {
+              tagCountMap.set(tag.id, { tagName: tag.name, cardCount: 1 });
+            }
           });
         });
-        const tagStats = Object.entries(tagCountMap).map(([tag, count]) => ({ tag, count }));
-        return <StatsOverview stats={{ totalReviewed, correctPercent }} tagStats={tagStats} />;
+        const tagStats: TagStatisticDto[] = Array.from(tagCountMap.entries()).map(
+          ([tagId, { tagName, cardCount }]) => ({ tagId, tagName, cardCount }),
+        );
+        return <StatsOverview stats={{ totalReviews, correctPercentage }} tagStats={tagStats} />;
       })()}
       <FlashcardTable items={items} onEdit={handleEdit} onDelete={handleDelete} />
       <PaginationControls pagination={pagination} onPageChange={handlePageChange} />

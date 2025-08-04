@@ -266,7 +266,7 @@ This document outlines the REST API for the 10xFlashCards application, based on 
 
 - **Method**: `GET`
 - **Path**: `/api/stats/performance`
-- **Description**: Retrieves performance statistics for the user, including daily review stats for the current week.
+- **Description**: Retrieves performance statistics for the user, including daily review stats for the current week. The statistics are derived from the `get_performance_stats` view, which provides total reviews and the percentage of correct answers.
 - **Response `200 OK`**:
   ```json
   {

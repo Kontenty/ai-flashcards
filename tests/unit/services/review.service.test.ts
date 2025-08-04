@@ -12,7 +12,7 @@ function createSupabaseStub() {
     select: vi.fn().mockReturnThis(),
     eq: vi.fn().mockReturnThis(),
     lte: vi.fn().mockReturnThis(),
-  } as unknown as Record<string, any>;
+  };
 
   const supabase = {
     auth: {
@@ -30,7 +30,7 @@ describe("ReviewService", () => {
     it("returns cards on success", async () => {
       const { supabase, builder } = createSupabaseStub();
       // Simulate DB returning data
-      (builder.select as any).mockReturnValueOnce({
+      builder.select.mockReturnValueOnce({
         eq: () => ({
           lte: () => ({ data: [{ id: "c1", front: "F", back: "B" }], error: null }),
         }),
@@ -45,7 +45,7 @@ describe("ReviewService", () => {
 
     it("propagates database errors via Result.error", async () => {
       const { supabase, builder } = createSupabaseStub();
-      (builder.select as any).mockReturnValueOnce({
+      builder.select.mockReturnValueOnce({
         eq: () => ({ lte: () => ({ data: null, error: new Error("db fail") }) }),
       });
 
@@ -66,7 +66,7 @@ describe("ReviewService", () => {
       const cmd: SubmitReviewCommand = { flashcardId: "abc", quality: 4 };
       const result = await service.processReview(cmd);
 
-      expect(supabase.rpc).toHaveBeenCalledWith("process_flashcard_review", {
+      expect(supabase.rpc).toHaveBeenCalledWith("public.process_flashcard_review", {
         p_flashcard_id: "abc",
         p_quality: 4,
       });

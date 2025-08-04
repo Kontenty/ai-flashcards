@@ -16,11 +16,11 @@ const PaginationControls: React.FC<PaginationControlsProps> = ({ pagination, onP
       Previous
     </button>
     <span>
-      Page {pagination.page} of {Math.ceil(pagination.total / pagination.pageSize)}
+      Page {pagination.page} of {pagination.totalPages}
     </span>
     <button
       onClick={() => onPageChange(pagination.page + 1)}
-      disabled={pagination.page * pagination.pageSize >= pagination.total}
+      disabled={pagination.page >= pagination.totalPages}
       className="px-2 py-1 bg-gray-200 rounded disabled:opacity-50"
     >
       Next

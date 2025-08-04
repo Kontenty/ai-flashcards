@@ -106,7 +106,7 @@ export function createFlashcardService(supabase: SupabaseClient<Database>) {
           back: flashcardWithTags.back,
           created_at: flashcardWithTags.created_at,
           updated_at: flashcardWithTags.updated_at,
-          tags: flashcardWithTags.tags.map((t) => t.tag.name),
+          tags: flashcardWithTags.tags.map((t) => ({ id: t.tag.id, name: t.tag.name })),
         };
 
         return Result.ok(flashcardDto);
@@ -194,7 +194,7 @@ export function createFlashcardService(supabase: SupabaseClient<Database>) {
           back: flashcard.back,
           created_at: flashcard.created_at,
           updated_at: flashcard.updated_at,
-          tags: flashcard.tags.map((t) => t.tag.name),
+          tags: flashcard.tags.map((t) => ({ id: t.tag.id, name: t.tag.name })),
         }));
 
         return Result.ok(flashcardDtos);
@@ -261,7 +261,7 @@ export function createFlashcardService(supabase: SupabaseClient<Database>) {
           front: f.front,
           back: f.back,
           next_review_date: f.next_review_date,
-          tags: f.tags.map((t) => t.tag.name),
+          tags: f.tags.map((t) => ({ id: t.tag.id, name: t.tag.name })),
         }));
         return Result.ok({
           items,
@@ -319,7 +319,7 @@ export function createFlashcardService(supabase: SupabaseClient<Database>) {
           back: f.back,
           created_at: f.created_at,
           updated_at: f.updated_at,
-          tags: f.tags.map((t) => t.tag.name),
+          tags: f.tags.map((t) => ({ id: t.tag.id, name: t.tag.name })),
         };
         return Result.ok(dto);
       } catch (error) {
@@ -385,7 +385,7 @@ export function createFlashcardService(supabase: SupabaseClient<Database>) {
           back: f2.back,
           created_at: f2.created_at,
           updated_at: f2.updated_at,
-          tags: f2.tags.map((t) => t.tag.name),
+          tags: f2.tags.map((t) => ({ id: t.tag.id, name: t.tag.name })),
         };
         return Result.ok(dto2);
       } catch (error) {

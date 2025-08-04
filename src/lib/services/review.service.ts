@@ -44,7 +44,7 @@ export function createReviewService(supabase: SupabaseClient<Database>) {
 
         const { data, error } = await supabase
           .from("flashcards")
-          .select("id, front, back")
+          .select("id, front, back, ease_factor, interval")
           .eq("user_id", user.id)
           .lte("next_review_date", todayIso);
 
