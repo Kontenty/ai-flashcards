@@ -1,78 +1,92 @@
-import { z } from "zod";
 import type { APIRoute } from "astro";
 import { logService } from "@/lib/services/log.service";
+import { createReviewService } from "@/lib/services/review.service";
+import { reviewParamsSchema, submitReviewSchema } from "@/lib/validators/review.schema";
 
 export const prerender = false;
 
-// Validation schemas
-const paramSchema = z.object({ id: z.string().uuid() });
-const reviewSchema = z.object({ quality: z.number().int().min(0).max(5) });
-
+/**
+ * POST /api/flashcards/{id}/review – submits a single review result for the
+ * flashcard identified by `{id}`.
+ */
 export const POST: APIRoute = async ({ request, params, locals }) => {
   try {
-    // Parse and validate params
-    const parsedParams = paramSchema.safeParse(params);
+    /* ----------------------------------------------------------------------- */
+    /* 1. Validate input                                                       */
+    /* ----------------------------------------------------------------------- */
+    const parsedParams = reviewParamsSchema.safeParse(params);
     if (!parsedParams.success) {
-      logService.warn("Invalid flashcard ID format for review", {
+      logService.warn("Invalid path params in review endpoint", {
         details: parsedParams.error.format(),
       });
-      return new Response(JSON.stringify({ error: "Invalid ID format" }), { status: 400 });
+      return new Response(
+        JSON.stringify({ message: "Invalid flashcard id", details: parsedParams.error.format() }),
+        { status: 400 },
+      );
     }
     const { id } = parsedParams.data;
 
-    // Parse and validate body
-    const body = await request.json();
-    const parsedBody = reviewSchema.safeParse(body);
+    let json: unknown;
+    try {
+      json = await request.json();
+    } catch (err) {
+      logService.warn("Malformed JSON body in review endpoint", { error: err });
+      return new Response(JSON.stringify({ message: "Malformed JSON body" }), { status: 400 });
+    }
+
+    const parsedBody = submitReviewSchema.safeParse(json);
     if (!parsedBody.success) {
-      logService.warn("Invalid review request", { details: parsedBody.error.format() });
+      logService.warn("Invalid body in review endpoint", { details: parsedBody.error.format() });
       return new Response(
-        JSON.stringify({ error: "Invalid request data", details: parsedBody.error.format() }),
+        JSON.stringify({ message: "Invalid request body", details: parsedBody.error.format() }),
         { status: 400 },
       );
     }
     const { quality } = parsedBody.data;
 
-    // Verify authentication
-    const {
-      data: { user },
-      error: authError,
-    } = await locals.supabase.auth.getUser();
-    if (authError || !user) {
-      logService.warn("Unauthorized review attempt", { id });
-      return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
+    /* ----------------------------------------------------------------------- */
+    /* 2. Authentication                                                       */
+    /* ----------------------------------------------------------------------- */
+    if (!locals.user) {
+      return new Response(JSON.stringify({ message: "Unauthorized" }), { status: 401 });
     }
 
-    // Call the SM-2 processing function
-    const { error: rpcError } = await locals.supabase.rpc("process_flashcard_review", {
-      p_flashcard_id: id,
-      p_quality: quality,
-    });
-    if (rpcError) {
-      if (rpcError.message.includes("Flashcard not found")) {
-        logService.warn("Flashcard not found for review", { id });
-        return new Response(JSON.stringify({ error: "Flashcard not found" }), { status: 404 });
+    /* ----------------------------------------------------------------------- */
+    /* 3. Business logic                                                       */
+    /* ----------------------------------------------------------------------- */
+    const reviewService = createReviewService(locals.supabase);
+    const result = await reviewService.processReview({ flashcardId: id, quality });
+
+    if (result.isError) {
+      // Map domain error messages to HTTP status codes
+      const msg = result.error;
+      if (msg === "User not authenticated") {
+        return new Response(JSON.stringify({ message: "Unauthorized" }), { status: 401 });
       }
-      logService.error("Failed to process flashcard review", { error: rpcError.message });
-      return new Response(
-        JSON.stringify({ error: "Failed to process review", details: rpcError.message }),
-        { status: 500 },
-      );
+      if (msg === "Flashcard not found") {
+        return new Response(JSON.stringify({ message: "Flashcard not found" }), { status: 404 });
+      }
+      if (msg === "Invalid flashcard ID") {
+        return new Response(JSON.stringify({ message: msg }), { status: 400 });
+      }
+
+      logService.error("Failed to process flashcard review", { error: msg });
+      return new Response(JSON.stringify({ message: "Internal server error", details: msg }), {
+        status: 500,
+      });
     }
 
-    // Success
+    /* ----------------------------------------------------------------------- */
+    /* 4. Success                                                              */
+    /* ----------------------------------------------------------------------- */
     return new Response(JSON.stringify({ message: "Review processed successfully." }), {
       status: 200,
+      headers: { "Content-Type": "application/json" },
     });
   } catch (error) {
-    logService.error("Internal error processing flashcard review", {
+    logService.error("Unhandled error in flashcard review endpoint", {
       error: error instanceof Error ? error.message : error,
     });
-    return new Response(
-      JSON.stringify({
-        error: "Internal server error",
-        details: error instanceof Error ? error.message : "Unknown error",
-      }),
-      { status: 500 },
-    );
+    return new Response(JSON.stringify({ message: "Internal server error" }), { status: 500 });
   }
 };
