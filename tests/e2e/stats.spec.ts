@@ -20,7 +20,20 @@ test.describe("Stats API Endpoints", () => {
     expect(response.status()).toBe(200);
 
     const data = await response.json();
-    expect(data).toHaveProperty("totalReviewed");
-    expect(data).toHaveProperty("correctPercent");
+    expect(data).toHaveProperty("totalReviews");
+    expect(data).toHaveProperty("correctPercentage");
+  });
+
+  test("GET /api/stats/performance?include=daily_stats should include daily breakdown", async ({
+    request,
+  }) => {
+    const response = await request.get("/api/stats/performance?include=daily_stats");
+    expect(response.status()).toBe(200);
+
+    const data = await response.json();
+    expect(data).toHaveProperty("dailyStats");
+    if (data.dailyStats) {
+      expect(Array.isArray(data.dailyStats)).toBe(true);
+    }
   });
 });

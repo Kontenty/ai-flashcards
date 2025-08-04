@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useDashboardData } from "@/hooks/useDashboardData";
 import { StatsWidgets } from "./StatsWidgets";
 import { QuickActions } from "./QuickActions";
-// import { ActivityChart } from "./ActivityChart";
+import { ActivityChart } from "./ActivityChart";
 import { RecentFlashcardsList } from "./RecentFlashcardsList";
 import { DueFlashcardsList } from "./DueFlashcardsList";
 import { Toaster } from "@/components/ui/sonner";
@@ -45,8 +45,8 @@ export function DashboardView() {
 
   const statsTiles = [
     { label: "Łącznie fiszek", value: data.totalFlashcards },
-    { label: "Łącznie recenzji", value: data.stats.totalReviewed },
-    { label: "Poprawność", value: `${data.stats.correctPercent}%` },
+    { label: "Łącznie recenzji", value: data.stats.totalReviews },
+    { label: "Poprawność", value: `${data.stats.correctPercentage.toFixed(1)}%` },
     {
       label: "Tagów",
       value: data.tagStats.length,
@@ -72,9 +72,9 @@ export function DashboardView() {
         <QuickActions actions={actions} />
       </div>
       {/* TODO: fix activity chart */}
-      {/* <div className="mb-6">
+      <div className="mb-6">
         <ActivityChart data={data.activity} />
-      </div> */}
+      </div>
       <div className="grid gap-6 md:grid-cols-2 mb-6">
         <RecentFlashcardsList items={data.recent} />
         <DueFlashcardsList items={data.due} />
