@@ -60,7 +60,11 @@ with check (auth.uid() = user_id);
 create or replace function public.process_flashcard_review(
   p_flashcard_id uuid,
   p_quality smallint
-) returns void as $$
+) returns void 
+   language plpgsql volatile 
+   security definer
+  set search_path = public, pg_temp
+as $$
 declare
   v_card public.flashcards%rowtype;
   v_new_interval integer;
@@ -112,7 +116,7 @@ begin
       updated_at = now()
   where id = p_flashcard_id;
 end;
-$$ language plpgsql volatile security definer;
+$$;
 
 -- grant execute permissions on the function to authenticated users.
 grant execute on function public.process_flashcard_review(uuid, smallint) to authenticated;
