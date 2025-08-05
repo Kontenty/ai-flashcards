@@ -1,0 +1,18 @@
+---
+import { Toaster } from "@/components/ui/sonner";
+import SidebarNavigation from "@/components/SidebarNavigation";
+import "@/styles/global.css";
+import Layout from "@/layouts/Layout.astro";
+
+---
+
+<Layout>
+    {/* Sidebar + page content */}
+    <SidebarNavigation client:load>
+        <section class="flex-1">
+          <slot />
+        </section>
+    </SidebarNavigation>
+
+  <Toaster richColors closeButton client:only="react" />
+</Layout>
