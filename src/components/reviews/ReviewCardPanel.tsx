@@ -18,11 +18,11 @@ export function ReviewCardPanel() {
   const progress = (currentIndex / cards.length) * 100;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4" data-testid="review-card-panel">
       <Progress value={progress} />
       <FlashcardFrontBack card={card} side={side} onFlip={flip} />
       <div className="text-center">
-        <Button variant="outline" onClick={flip} className="mt-2">
+        <Button data-testid="review-flip-button" variant="outline" onClick={flip} className="mt-2">
           {side === "front" ? "Pokaż odpowiedź" : "Ukryj odpowiedź"}
         </Button>
       </div>

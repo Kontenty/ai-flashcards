@@ -48,7 +48,7 @@ describe("StatsService.getPerformanceStats", () => {
   });
 
   it("includes daily stats when requested", async () => {
-    const { supabase, builder } = createSupabaseStub();
+    const { supabase } = createSupabaseStub();
 
     // Mock the get_performance_stats view query
     const mockAggSelect = vi.fn().mockResolvedValue({

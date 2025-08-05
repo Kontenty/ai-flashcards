@@ -1,5 +1,6 @@
-import React, { createContext, useCallback, useContext, useMemo, useState } from "react";
+import React, { createContext, useCallback, useContext, useMemo, useState, useEffect } from "react";
 import { toast } from "sonner";
+import { fetchReviewSession, submitReview } from "@/lib/services/reviewSession.service";
 import type { ReviewCardDto } from "@/types";
 
 interface SummaryStats {
@@ -16,6 +17,8 @@ interface ReviewSessionState {
   summary?: SummaryStats;
   loading: boolean;
   isSubmitting: boolean;
+  dueCards: ReviewCardDto[]; // List of due flashcards
+  dueCardsLoading: boolean; // Loading state for due cards
 }
 
 interface ReviewSessionContextValue {
@@ -23,6 +26,7 @@ interface ReviewSessionContextValue {
   startSession: (tagIds?: string[]) => Promise<void>;
   flip: () => void;
   rate: (quality: number) => Promise<void>;
+  refreshDueCards: () => Promise<void>;
 }
 
 const ReviewSessionContext = createContext<ReviewSessionContextValue | undefined>(undefined);
@@ -35,19 +39,46 @@ export const ReviewSessionProvider: React.FC<{ children: React.ReactNode }> = ({
     submitted: {},
     loading: false,
     isSubmitting: false,
+    dueCards: [],
+    dueCardsLoading: true,
   });
+  // Centralized error handler to DRY up toast messages and state resets
+  const handleError = (error: unknown, partialState: Partial<ReviewSessionState> = {}) => {
+    const message = error instanceof Error ? error.message : String(error);
+    toast.error(message);
+    setState((prev) => ({ ...prev, ...partialState }));
+  };
+
+  const fetchDueCards = useCallback(async () => {
+    setState((prev) => ({ ...prev, dueCardsLoading: true }));
+    try {
+      const cards = await fetchReviewSession();
+      setState((s) => ({
+        ...s,
+        dueCards: cards ?? [],
+        dueCardsLoading: false,
+      }));
+    } catch (err) {
+      handleError(err, { dueCardsLoading: false });
+    }
+  }, []);
+
+  // Fetch due cards on mount
+  useEffect(() => {
+    fetchDueCards();
+  }, [fetchDueCards]);
 
   const startSession = useCallback(async (tagIds?: string[]) => {
-    setState((s) => ({ ...s, loading: true, summary: undefined }));
+    setState((prev) => ({ ...prev, loading: true, summary: undefined }));
     try {
-      const { fetchReviewSession } = await import("@/lib/services/reviewSession.service");
       const cards = await fetchReviewSession(tagIds);
       if (cards === null) {
         toast.info("Brak fiszek do powtórki na dziś");
-        setState((s) => ({ ...s, loading: false }));
+        setState((prev) => ({ ...prev, loading: false }));
         return;
       }
-      setState({
+      setState((prev) => ({
+        ...prev,
         cards,
         currentIndex: 0,
         side: "front",
@@ -55,10 +86,9 @@ export const ReviewSessionProvider: React.FC<{ children: React.ReactNode }> = ({
         summary: undefined,
         loading: false,
         isSubmitting: false,
-      });
+      }));
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : String(err));
-      setState((s) => ({ ...s, loading: false }));
+      handleError(err, { loading: false });
     }
   }, []);
 
@@ -72,12 +102,13 @@ export const ReviewSessionProvider: React.FC<{ children: React.ReactNode }> = ({
       try {
         const { cards, currentIndex, side } = state;
         if (side === "front" || !cards[currentIndex]) {
-          setState((s) => ({ ...s, isSubmitting: false }));
+          setState((prev) => ({ ...prev, isSubmitting: false }));
           return;
         }
         const card = cards[currentIndex];
-        const { submitReview } = await import("@/lib/services/reviewSession.service");
-        await submitReview(card.id, quality);
+        // show the API’s success message as a toast
+        const reviewResponse = await submitReview(card.id, quality);
+        toast.success(reviewResponse.message);
 
         setState((prev) => {
           const newSubmitted = { ...prev.submitted, [card.id]: quality };
@@ -105,22 +136,25 @@ export const ReviewSessionProvider: React.FC<{ children: React.ReactNode }> = ({
           };
         });
       } catch (err) {
-        // Network error -> retry after delay
         if (err instanceof TypeError) {
           toast.error("Błąd sieci – ponawiam za 5 s…");
+          setState((prev) => ({ ...prev, isSubmitting: false }));
           setTimeout(() => rate(quality), 5000);
         } else {
-          toast.error(err instanceof Error ? err.message : String(err));
+          handleError(err, { isSubmitting: false });
         }
-        setState((s) => ({ ...s, isSubmitting: false }));
       }
     },
     [state],
   );
 
+  const refreshDueCards = useCallback(async () => {
+    await fetchDueCards();
+  }, [fetchDueCards]);
+
   const contextValue: ReviewSessionContextValue = useMemo(
-    () => ({ state, startSession, flip, rate }),
-    [state, startSession, flip, rate],
+    () => ({ state, startSession, flip, rate, refreshDueCards }),
+    [state, startSession, flip, rate, refreshDueCards],
   );
 
   return (

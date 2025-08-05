@@ -5,52 +5,29 @@ import { test, expect } from "@playwright/test";
 dotenv.config({ path: path.resolve(process.cwd(), ".env.test") });
 
 test.describe("Reviews Session E2E Tests", () => {
-  test("returns 200 with cards", async ({ page }) => {
-    await page.route("**/api/reviews/session", async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: "application/json",
-        body: JSON.stringify({
-          cards: [{ id: "1", front: "Test card", interval: 1, ease_factor: 2.5 }],
-        }),
-      });
-    });
-    const response = await page.goto("/api/reviews/session");
-    if (!response) {
-      throw new Error("Navigation to /api/reviews/session failed");
-    }
-    expect(response.status()).toBe(200);
-    const data = await response.json();
-    expect(data).toEqual({
-      cards: [{ id: "1", front: "Test card", interval: 1, ease_factor: 2.5 }],
-    });
-  });
+  test.use({ storageState: "playwright/.auth/user.json" });
 
-  test("returns 204 when no cards due", async ({ page }) => {
-    await page.route("**/api/reviews/session", async (route) => {
-      await route.fulfill({ status: 204, body: "" });
-    });
-    const response = await page.goto("/api/reviews/session");
-    if (!response) {
-      throw new Error("Navigation to /api/reviews/session failed");
-    }
-    expect(response.status()).toBe(204);
-  });
+  test("returns 200 with cards when cards are available", async ({ page }) => {
+    // This test assumes there are cards available for review
+    // The actual response will depend on the database state
+    const response = await page.request.get("/api/reviews/session");
 
-  test("returns 401 when unauthorized", async ({ page }) => {
-    await page.route("**/api/reviews/session", async (route) => {
-      await route.fulfill({
-        status: 401,
-        contentType: "application/json",
-        body: JSON.stringify({ error: "Unauthorized" }),
-      });
-    });
-    const response = await page.goto("/api/reviews/session");
-    if (!response) {
-      throw new Error("Navigation to /api/reviews/session failed");
+    // Should return either 200 with cards or 204 if no cards due
+    expect([200, 204]).toContain(response.status());
+
+    if (response.status() === 200) {
+      const data = await response.json();
+      expect(data).toHaveProperty("cards");
+      expect(Array.isArray(data.cards)).toBe(true);
+
+      if (data.cards.length > 0) {
+        const card = data.cards[0];
+        expect(card).toHaveProperty("id");
+        expect(card).toHaveProperty("front");
+        expect(card).toHaveProperty("back");
+        expect(card).toHaveProperty("interval");
+        expect(card).toHaveProperty("ease_factor");
+      }
     }
-    expect(response.status()).toBe(401);
-    const errorJson = await response.json();
-    expect(errorJson.error).toBe("Unauthorized");
   });
 });

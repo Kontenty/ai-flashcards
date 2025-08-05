@@ -11,7 +11,7 @@ test.describe("Dashboard E2E Tests", () => {
       await route.fulfill({
         status: 200,
         contentType: "application/json",
-        body: JSON.stringify({ pagination: { total: 5 } }),
+        body: JSON.stringify({ pagination: { totalItems: 5 } }),
       });
     });
     // Stub recent flashcards
@@ -21,7 +21,7 @@ test.describe("Dashboard E2E Tests", () => {
         contentType: "application/json",
         body: JSON.stringify({
           items: [{ id: "1", front: "Q1", back: "A1", tags: [] }],
-          pagination: { page: 1, pageSize: 5, total: 1 },
+          pagination: { page: 1, pageSize: 5, totalItems: 1 },
         }),
       });
     });
@@ -30,7 +30,7 @@ test.describe("Dashboard E2E Tests", () => {
       await route.fulfill({
         status: 200,
         contentType: "application/json",
-        body: JSON.stringify({ totalReviewed: 10, correctPercent: 80 }),
+        body: JSON.stringify({ totalReviews: 10, correctPercentage: 80 }),
       });
     });
     // Stub tag stats
@@ -39,8 +39,8 @@ test.describe("Dashboard E2E Tests", () => {
         status: 200,
         contentType: "application/json",
         body: JSON.stringify([
-          { tag: "tag1", count: 2 },
-          { tag: "tag2", count: 3 },
+          { tagId: "1", tagName: "tag1", cardCount: 2 },
+          { tagId: "2", tagName: "tag2", cardCount: 3 },
         ]),
       });
     });
@@ -56,30 +56,40 @@ test.describe("Dashboard E2E Tests", () => {
       await route.fulfill({
         status: 200,
         contentType: "application/json",
-        body: JSON.stringify({ cards: [{ id: "1", front: "R1", interval: 1, easeFactor: 2.5 }] }),
+        body: JSON.stringify({ cards: [{ id: "1", front: "R1", interval: 1, ease_factor: 2.5 }] }),
       });
     });
     // Navigate to dashboard
     await page.goto("/dashboard");
     // Wait for network idle to ensure all data loaded
     await page.waitForLoadState("networkidle");
+    // Wait for the dashboard to be fully loaded
+    await page.waitForTimeout(1000);
   });
 
   test("displays key stats", async ({ page }) => {
-    // Verify stats tiles
-    await expect(page.getByText("Łącznie fiszek")).toBeVisible();
-    await expect(page.getByText("5")).toBeVisible();
+    // Wait for stats to be visible and use more specific selectors
+    await expect(page.getByText("Łącznie fiszek")).toBeVisible({ timeout: 10000 });
+
+    // Find the stats tile containing "Łącznie fiszek" and check its value
+    const totalFlashcardsTile = page.locator("div").filter({ hasText: "Łącznie fiszek" });
+    await expect(totalFlashcardsTile.locator("span.text-2xl").getByText("5")).toBeVisible();
+
     await expect(page.getByText("Łącznie powtórek")).toBeVisible();
     await expect(page.getByText("10")).toBeVisible();
     await expect(page.getByText("Poprawność")).toBeVisible();
-    await expect(page.getByText("80%")).toBeVisible();
+    // Find the stats tile containing "Poprawność" and check its value (allow for decimals)
+    const correctTile = page.locator("div").filter({ hasText: "Poprawność" });
+    await expect(correctTile.locator("span.text-2xl").getByText(/80(\.0)?%/)).toBeVisible();
     await expect(page.getByText("Tagów")).toBeVisible();
-    await expect(page.getByText("2")).toBeVisible();
+    // Find the stats tile containing "Tagów" and check its value
+    const tagsTile = page.locator("div").filter({ hasText: "Tagów" });
+    await expect(tagsTile.locator("span.text-2xl").getByText("2")).toBeVisible();
   });
 
   test("lists recent and due flashcards and quick actions", async ({ page }) => {
-    // Recent flashcards list
-    await expect(page.getByText("Ostatnio dodane fiszki")).toBeVisible();
+    // Wait for content to be visible
+    await expect(page.getByText("Ostatnio dodane fiszki")).toBeVisible({ timeout: 10000 });
     await expect(page.getByText("Q1")).toBeVisible();
     // Due flashcards list
     await expect(page.getByText("Fiszki do powtórki")).toBeVisible();

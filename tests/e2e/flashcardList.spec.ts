@@ -65,6 +65,9 @@ test.describe("FlashcardList E2E Tests", () => {
     // Open reject dialog and cancel
     await flashcardListPage.rejectCard(1);
     await expect(flashcardListPage.rejectDialog).toBeVisible();
+
+    // Wait for the dialog to be fully visible and stable
+    await expect(flashcardListPage.rejectDialogCancel).toBeVisible();
     await flashcardListPage.cancelReject();
 
     // The second card should still be visible
@@ -88,8 +91,8 @@ test.describe("FlashcardList E2E Tests", () => {
 
     // After saving, user should be redirected to the flashcards list page
     await expect(page).toHaveURL("/flashcards");
-    // The FlashcardTable header should be visible
-    await expect(page.getByText("Front")).toBeVisible();
+    // The FlashcardTable header should be visible (using Polish text)
+    await expect(page.getByText("Przód")).toBeVisible();
   });
 
   test("shows error on bulk save failure", async ({ page }) => {

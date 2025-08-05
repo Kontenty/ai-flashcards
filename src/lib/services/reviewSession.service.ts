@@ -13,10 +13,9 @@ import { getStringField } from "@/lib/utils";
  * @returns array of cards or null when 204 No Content
  */
 export async function fetchReviewSession(tagIds?: string[]): Promise<ReviewCardDto[] | null> {
-  const params = new URLSearchParams();
-  if (tagIds?.length) params.set("tags", tagIds.join(","));
-
-  const res = await fetch(`/api/reviews/session?${params.toString()}`);
+  let url = "/api/reviews/session";
+  if (tagIds?.length) url += `?tags=${tagIds.join(",")}`;
+  const res = await fetch(url);
 
   // 204 – no cards to review
   if (res.status === 204) return null;

@@ -122,8 +122,6 @@ const ListFlashcardsView: React.FC = () => {
       />
       {/* Compute overview stats */}
       {(() => {
-        const totalReviews = pagination.totalItems;
-        const correctPercentage = 0; // Placeholder until review data available
         // Compute tag usage counts
         const tagCountMap = new Map<string, { tagName: string; cardCount: number }>();
         items.forEach((item) => {
@@ -139,7 +137,7 @@ const ListFlashcardsView: React.FC = () => {
         const tagStats: TagStatisticDto[] = Array.from(tagCountMap.entries()).map(
           ([tagId, { tagName, cardCount }]) => ({ tagId, tagName, cardCount }),
         );
-        return <StatsOverview stats={{ totalReviews, correctPercentage }} tagStats={tagStats} />;
+        return <StatsOverview cardsCount={pagination.totalItems} tagStats={tagStats} />;
       })()}
       <FlashcardTable items={items} onEdit={handleEdit} onDelete={handleDelete} />
       <PaginationControls pagination={pagination} onPageChange={handlePageChange} />

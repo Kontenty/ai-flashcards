@@ -10,7 +10,7 @@ export function ReviewSummaryPanel() {
   if (!summary) return null;
 
   return (
-    <div className="space-y-6 max-w-lg mx-auto text-center">
+    <div className="space-y-6 max-w-lg mx-auto text-center" data-testid="review-summary-panel">
       <h2 className="text-2xl font-semibold">Podsumowanie sesji</h2>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <StatsTile label="Karty" value={summary.total} />
@@ -25,7 +25,12 @@ export function ReviewSummaryPanel() {
           tooltip="Odsetek kart z oceną ≥3"
         />
       </div>
-      <Button onClick={() => (window.location.href = "/dashboard")}>Powrót do dashboardu</Button>
+      <Button
+        data-testid="review-summary-back-button"
+        onClick={() => (window.location.href = "/dashboard")}
+      >
+        Powrót do dashboardu
+      </Button>
     </div>
   );
 }
