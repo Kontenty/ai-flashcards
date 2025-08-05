@@ -8,7 +8,7 @@ import cloudflareAstro from "@astrojs/cloudflare";
 
 // Determine if running in Playwright tests (not deployment)
 // eslint-disable-next-line no-undef
-const environment = process.env.MODE === "test" ? "node" : "cloudflare";
+const environment = ["test", "development"].includes(process.env.NODE_ENV) ? "node" : "cloudflare";
 const cloudflareAdapter = cloudflareAstro({
   platformProxy: {
     enabled: true,

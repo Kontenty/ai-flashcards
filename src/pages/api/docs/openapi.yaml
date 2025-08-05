@@ -156,6 +156,36 @@ components:
         name:
           type: string
 
+    DailyReviewStat:
+      type: object
+      required:
+        - reviewDate
+        - cardsReviewed
+        - meanQuality
+      properties:
+        reviewDate:
+          type: string
+          format: date
+        cardsReviewed:
+          type: integer
+        meanQuality:
+          type: number
+
+    PerformanceStats:
+      type: object
+      required:
+        - totalReviews
+        - correctPercentage
+      properties:
+        totalReviews:
+          type: integer
+        correctPercentage:
+          type: number
+        dailyStats:
+          type: array
+          items:
+            $ref: "#/components/schemas/DailyReviewStat"
+
     CreateTagRequest:
       type: object
       required:
@@ -409,6 +439,33 @@ paths:
           $ref: "#/components/responses/NotFound"
         "500":
           $ref: "#/components/responses/InternalError"
+  /stats/performance:
+    get:
+      summary: Get performance statistics
+      description: Returns aggregated review performance metrics for the authenticated user.
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: query
+          name: include
+          schema:
+            type: string
+            example: daily_stats
+          description: Comma-separated list of additional fragments to include. Currently supports 'daily_stats'.
+      responses:
+        "200":
+          description: Performance statistics
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PerformanceStats"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
   /tags:
     get:
       summary: List tags

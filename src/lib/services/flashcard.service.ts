@@ -23,6 +23,8 @@ interface FlashcardWithTags {
   created_at: string;
   updated_at: string;
   tags: TagWithName[];
+  ease_factor: number;
+  interval: number;
 }
 
 // For listing with next_review_date (non-nullable)
@@ -106,7 +108,7 @@ export function createFlashcardService(supabase: SupabaseClient<Database>) {
           back: flashcardWithTags.back,
           created_at: flashcardWithTags.created_at,
           updated_at: flashcardWithTags.updated_at,
-          tags: flashcardWithTags.tags.map((t) => t.tag.name),
+          tags: flashcardWithTags.tags.map((t) => ({ id: t.tag.id, name: t.tag.name })),
         };
 
         return Result.ok(flashcardDto);
@@ -194,7 +196,7 @@ export function createFlashcardService(supabase: SupabaseClient<Database>) {
           back: flashcard.back,
           created_at: flashcard.created_at,
           updated_at: flashcard.updated_at,
-          tags: flashcard.tags.map((t) => t.tag.name),
+          tags: flashcard.tags.map((t) => ({ id: t.tag.id, name: t.tag.name })),
         }));
 
         return Result.ok(flashcardDtos);
@@ -240,8 +242,16 @@ export function createFlashcardService(supabase: SupabaseClient<Database>) {
         if (query.tags && query.tags.length > 0) {
           builder = builder.in("flashcard_tags.tag_id", query.tags);
         }
+
+        // Apply sorting if provided
+        if (query.orderBy) {
+          const [column, direction] = query.orderBy.split(":");
+          builder = builder.order(column, { ascending: direction.toLowerCase() !== "desc" });
+        }
+
         const from = (page - 1) * pageSize;
         const to = page * pageSize - 1;
+
         const { data: flashcards, count, error } = await builder.range(from, to);
         if (error) {
           return Result.error("Failed to list flashcards: " + error.message);
@@ -253,9 +263,19 @@ export function createFlashcardService(supabase: SupabaseClient<Database>) {
           front: f.front,
           back: f.back,
           next_review_date: f.next_review_date,
-          tags: f.tags.map((t) => t.tag.name),
+          ease_factor: f.ease_factor,
+          interval: f.interval,
+          tags: f.tags.map((t) => ({ id: t.tag.id, name: t.tag.name })),
         }));
-        return Result.ok({ items, pagination: { page, pageSize, total: count ?? items.length } });
+        return Result.ok({
+          items,
+          pagination: {
+            page,
+            pageSize,
+            totalItems: count ?? items.length,
+            totalPages: Math.ceil((count ?? items.length) / pageSize),
+          },
+        });
       } catch (error) {
         return Result.error(error instanceof Error ? error.message : "Unknown error occurred");
       }
@@ -303,7 +323,7 @@ export function createFlashcardService(supabase: SupabaseClient<Database>) {
           back: f.back,
           created_at: f.created_at,
           updated_at: f.updated_at,
-          tags: f.tags.map((t) => t.tag.name),
+          tags: f.tags.map((t) => ({ id: t.tag.id, name: t.tag.name })),
         };
         return Result.ok(dto);
       } catch (error) {
@@ -369,7 +389,7 @@ export function createFlashcardService(supabase: SupabaseClient<Database>) {
           back: f2.back,
           created_at: f2.created_at,
           updated_at: f2.updated_at,
-          tags: f2.tags.map((t) => t.tag.name),
+          tags: f2.tags.map((t) => ({ id: t.tag.id, name: t.tag.name })),
         };
         return Result.ok(dto2);
       } catch (error) {

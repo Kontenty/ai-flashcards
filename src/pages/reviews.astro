@@ -1,0 +1,8 @@
+---
+import Layout from "@/layouts/AuthenticatedLayout.astro";
+import { ReviewsPage } from "@/components/reviews/ReviewsPage";
+---
+
+<Layout title="Sesja powtórek">
+  <ReviewsPage client:load />
+</Layout>

@@ -15,12 +15,14 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import type { SuggestionDto, CreateFlashcardCommand } from "@/types";
+import { getStringField } from "@/lib/utils";
 
 interface FlashcardListProps {
   suggestions: SuggestionDto[];
   onEdit: (index: number) => void;
   onReject: (index: number) => void;
   onBulkSaveSuccess: () => void;
+  tagIds: string[];
 }
 
 export function FlashcardList({
@@ -28,6 +30,7 @@ export function FlashcardList({
   onEdit,
   onReject,
   onBulkSaveSuccess,
+  tagIds,
 }: Readonly<FlashcardListProps>) {
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -39,7 +42,7 @@ export function FlashcardList({
     const cards: CreateFlashcardCommand[] = suggestions.map((suggestion) => ({
       front: suggestion.front,
       back: suggestion.back,
-      tagIds: [],
+      tagIds,
     }));
 
     try {
@@ -57,7 +60,7 @@ export function FlashcardList({
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => null);
-        throw new Error(errorData?.message || "Failed to save flashcards");
+        throw new Error(getStringField(errorData, "message", "Failed to save flashcards"));
       }
 
       toast.success(`Saved ${cards.length} flashcards successfully`);

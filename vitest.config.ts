@@ -1,5 +1,6 @@
 import { defineConfig } from "vitest/config";
 import viteTsconfigPaths from "vite-tsconfig-paths";
+import path from "node:path";
 
 export default defineConfig({
   plugins: [viteTsconfigPaths()],
@@ -20,6 +21,11 @@ export default defineConfig({
           lines: 80,
         },
       },
+    },
+  },
+  resolve: {
+    alias: {
+      "@": path.resolve(__dirname, "src"),
     },
   },
 });

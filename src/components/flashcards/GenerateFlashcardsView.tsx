@@ -11,25 +11,30 @@ import type {
   SuggestionDto,
   CreateFlashcardCommand,
 } from "@/types";
+import { getStringField } from "@/lib/utils";
+import { TagSelector } from "./TagSelector";
+import type { TagOption } from "@/hooks/useTags";
 
 const initialEditCardState = {
   isOpen: false,
   cardIndex: -1,
 };
 type EditCard = typeof initialEditCardState;
+type GenerationStatus = "idle" | "pending" | "success" | "error";
 
 export function GenerateFlashcardsView() {
   const [text, setText] = useState("");
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [status, setStatus] = useState<GenerationStatus>("idle");
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [suggestions, setSuggestions] = useState<SuggestionDto[]>([]);
   const [editCard, setEditCard] = useState<EditCard>(initialEditCardState);
+  const [tags, setTags] = useState<TagOption[]>([]);
 
   const handleGenerate = async (text: string) => {
-    try {
-      setIsGenerating(true);
-      setError(null);
+    setStatus("pending");
+    setErrorMessage(null);
 
+    try {
       const response = await fetch("/api/flashcards/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -38,19 +43,19 @@ export function GenerateFlashcardsView() {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => null);
-        throw new Error(errorData?.message ?? "Failed to generate flashcards");
+        throw new Error(getStringField(errorData, "message", "Failed to generate flashcards"));
       }
 
       const data: GenerateFlashcardsResponseDto = await response.json();
       setSuggestions(data.suggestions);
       toast.success(`Generated ${data.suggestions.length} flashcards`);
+      setStatus("success");
     } catch (err) {
       const message =
         err instanceof Error ? err.message : "An error occurred while generating flashcards";
-      setError(message);
+      setErrorMessage(message);
+      setStatus("error");
       toast.error(message);
-    } finally {
-      setIsGenerating(false);
     }
   };
 
@@ -72,33 +77,40 @@ export function GenerateFlashcardsView() {
         text={text}
         onTextChange={setText}
         onGenerate={handleGenerate}
-        isGenerating={isGenerating}
-        error={error}
+        isGenerating={status === "pending"}
+        error={errorMessage}
       />
 
-      {isGenerating && (
+      {status === "pending" && (
         <div className="flex items-center justify-center py-8">
           <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
         </div>
       )}
 
-      {!isGenerating && (
-        <FlashcardList
-          suggestions={suggestions}
-          onEdit={handleEdit}
-          onReject={(index) => {
-            setSuggestions((prev) => prev.filter((_, i) => i !== index));
-            toast.success("Flashcard rejected");
-          }}
-          onBulkSaveSuccess={() => {
-            window.location.href = "/flashcards";
-          }}
-        />
+      {status === "success" && (
+        <>
+          <div className="flex flex-col gap-2 mx-32">
+            <h3 className="text-lg font-semibold">Tagi</h3>
+            <TagSelector value={tags} onChange={setTags} />
+          </div>
+          <FlashcardList
+            suggestions={suggestions}
+            onEdit={handleEdit}
+            onReject={(index) => {
+              setSuggestions((prev) => prev.filter((_, i) => i !== index));
+              toast.success("Flashcard rejected");
+            }}
+            onBulkSaveSuccess={() => {
+              window.location.href = "/flashcards";
+            }}
+            tagIds={tags.map((t) => t.id)}
+          />
+        </>
       )}
 
-      {error && (
+      {status === "error" && errorMessage && (
         <Alert variant="destructive" role="alert">
-          <AlertDescription>{error}</AlertDescription>
+          <AlertDescription>{errorMessage}</AlertDescription>
         </Alert>
       )}
 

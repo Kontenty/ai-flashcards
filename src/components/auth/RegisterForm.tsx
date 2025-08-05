@@ -3,6 +3,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Button } from "../ui/button";
+import { getStringField } from "@/lib/utils";
 
 const schema = z
   .object({
@@ -40,9 +41,9 @@ export const RegisterForm: React.FC = () => {
     });
     const body = await response.json();
     if (response.ok) {
-      setSuccessMessage(body.message);
+      setSuccessMessage(getStringField(body, "message", "Rejestracja udana"));
     } else {
-      setServerError(body.error || "Coś poszło nie tak");
+      setServerError(getStringField(body, "error", "Coś poszło nie tak"));
     }
   };
 

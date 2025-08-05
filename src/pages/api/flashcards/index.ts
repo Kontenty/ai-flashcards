@@ -20,6 +20,7 @@ const listQuerySchema = z.object({
     .transform((val) => (val ? parseInt(val, 10) : undefined)),
   tags: z.array(z.string().uuid()).optional(),
   search: z.string().optional(),
+  orderBy: z.string().optional(),
 });
 
 // Validation schema for a single flashcard
@@ -124,6 +125,7 @@ export const GET: APIRoute = async ({ request, locals }) => {
       pageSize: url.searchParams.get("pageSize") ?? undefined,
       tags: url.searchParams.getAll("tags") || undefined,
       search: url.searchParams.get("search") ?? undefined,
+      orderBy: url.searchParams.get("orderBy") ?? undefined,
     };
     const parsed = listQuerySchema.safeParse(rawQuery);
     if (!parsed.success) {
