@@ -3,7 +3,7 @@ import { renderHook, act } from "@testing-library/react";
 import { server } from "../../mocks/server";
 import { http, HttpResponse } from "msw";
 import { ReviewSessionProvider, useReviewSession } from "../../../src/hooks/useReviewSession";
-import { vi, describe, it, beforeEach, expect } from "vitest";
+import { describe, it, beforeEach, expect } from "vitest";
 
 // Helper to wrap hooks with provider
 const wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
