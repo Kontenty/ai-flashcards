@@ -21,7 +21,7 @@ export function ReviewStartPanel() {
   return (
     <div className="space-y-4 max-w-lg mx-auto">
       <h2 className="text-2xl font-semibold text-center">Rozpocznij sesję powtórkową</h2>
-      <TagSelector value={selectedTags} onChange={setSelectedTags} disabled={loading} />
+      <TagSelector value={selectedTags} onChange={setSelectedTags} disabled={loading} chooseOnly />
       <div className="text-center">
         <Button onClick={handleStart} disabled={loading} className="mt-4">
           {loading ? "Ładowanie..." : "Rozpocznij sesję"}

@@ -8,9 +8,10 @@ interface TagSelectorProps {
   value: TagOption[];
   onChange: (value: TagOption[]) => void;
   disabled?: boolean;
+  chooseOnly?: boolean;
 }
 
-export function TagSelector({ value, onChange, disabled }: TagSelectorProps) {
+export function TagSelector({ value, onChange, disabled, chooseOnly = false }: TagSelectorProps) {
   const { options, createTag, fetchTags } = useTags();
   const [newTagName, setNewTagName] = useState("");
 
@@ -41,19 +42,21 @@ export function TagSelector({ value, onChange, disabled }: TagSelectorProps) {
         disabled={disabled}
         className="w-full"
       />
-      <div className="flex gap-2">
-        <Input
-          type="text"
-          placeholder="Nowy tag"
-          value={newTagName}
-          onChange={(e) => setNewTagName(e.target.value)}
-          disabled={disabled}
-          className="flex-1"
-        />
-        <Button type="button" onClick={handleCreateTag} disabled={disabled || !newTagName.trim()}>
-          Dodaj
-        </Button>
-      </div>
+      {!chooseOnly && (
+        <div className="flex gap-2">
+          <Input
+            type="text"
+            placeholder="Nowy tag"
+            value={newTagName}
+            onChange={(e) => setNewTagName(e.target.value)}
+            disabled={disabled}
+            className="flex-1"
+          />
+          <Button type="button" onClick={handleCreateTag} disabled={disabled || !newTagName.trim()}>
+            Dodaj
+          </Button>
+        </div>
+      )}
     </div>
   );
 }
