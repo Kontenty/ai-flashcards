@@ -1,5 +1,6 @@
 import type { APIRoute } from "astro";
 import { createTagService } from "@/lib/services/tag.service";
+import { logService } from "@/lib/services/log.service";
 
 export const prerender = false;
 
@@ -16,7 +17,7 @@ export const GET: APIRoute = async ({ locals }) => {
     const result = await tagService.list();
 
     if (result.isError) {
-      console.error(result.error);
+      logService.error(result.error);
       return new Response(JSON.stringify({ message: "An unexpected error occurred." }), {
         status: 500,
       });
@@ -27,7 +28,7 @@ export const GET: APIRoute = async ({ locals }) => {
       headers: { "Content-Type": "application/json" },
     });
   } catch (error) {
-    console.error(error);
+    logService.error("An unexpected error during tags fetch", { error });
     return new Response(JSON.stringify({ message: "An unexpected error occurred." }), {
       status: 500,
     });

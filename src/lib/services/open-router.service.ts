@@ -167,12 +167,7 @@ export class OpenRouterService {
   }
 
   private _handleError(error: unknown): never {
-    if (typeof logService?.error === "function") {
-      logService.error("OpenRouterService error", { error });
-    } else {
-      // eslint-disable-next-line no-console
-      console.error("OpenRouterService error", error);
-    }
+    logService.error("OpenRouterService error", { error });
     if (error instanceof OpenRouterServiceError) {
       throw error;
     }

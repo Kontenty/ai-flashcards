@@ -1,6 +1,7 @@
 import type { APIRoute } from "astro";
 import { createStatsService } from "@/lib/services/stats.service";
 import { performanceQuerySchema } from "@/lib/validators/stats.schema";
+import { logService } from "@/lib/services/log.service";
 
 export const prerender = false;
 
@@ -32,7 +33,7 @@ export const GET: APIRoute = async ({ request, locals }) => {
     const result = await statsService.getPerformanceStats(user.id, { includeDaily });
 
     if (result.isError) {
-      console.error(result.error);
+      logService.error(result.error);
       return new Response(JSON.stringify({ message: "An unexpected error occurred." }), {
         status: 500,
       });
@@ -43,7 +44,7 @@ export const GET: APIRoute = async ({ request, locals }) => {
       headers: { "Content-Type": "application/json" },
     });
   } catch (error) {
-    console.error(error);
+    logService.error("An unexpected error during performance stats fetch", { error });
     return new Response(JSON.stringify({ message: "An unexpected error occurred." }), {
       status: 500,
     });
