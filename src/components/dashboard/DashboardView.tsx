@@ -47,7 +47,7 @@ export function DashboardView() {
 
   const statsTiles = [
     { label: "Łącznie fiszek", value: data.totalFlashcards },
-    { label: "Łącznie recenzji", value: data.stats.totalReviews },
+    { label: "Łącznie powtórek", value: data.stats.totalReviews },
     { label: "Poprawność", value: `${data.stats.correctPercentage.toFixed(1)}%` },
     {
       label: "Tagów",

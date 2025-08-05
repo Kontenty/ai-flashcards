@@ -20,8 +20,10 @@ export interface ActionVm {
 }
 
 export interface ActivityPoint {
+  [key: string]: string | number;
   date: string; // ISO YYYY-MM-DD
   reviews: number;
+  meanQuality: number;
 }
 
 export interface DashboardData {

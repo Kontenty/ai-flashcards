@@ -43,9 +43,11 @@ export function useDashboardData() {
       const tagsJson = (await tagsRes.json()) as TagStatisticDto[];
       const recentJson = (await recentRes.json()) as FlashcardListResponseDto;
       const dueJson = (await dueRes.json()) as ReviewSessionResponseDto;
-      const activityJson: ActivityPoint[] = (performanceJson.dailyStats ?? [])
+      const activityJson: ActivityPoint[] = (performanceJson?.dailyStats ?? [])
         .map((d) =>
-          d.reviewDate !== null ? { date: d.reviewDate, reviews: d.cardsReviewed } : undefined,
+          d.reviewDate !== null
+            ? { date: d.reviewDate, reviews: d.cardsReviewed, meanQuality: d.meanQuality }
+            : undefined,
         )
         .filter((p): p is ActivityPoint => p !== undefined);
 

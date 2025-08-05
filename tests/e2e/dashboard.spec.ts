@@ -69,7 +69,7 @@ test.describe("Dashboard E2E Tests", () => {
     // Verify stats tiles
     await expect(page.getByText("Łącznie fiszek")).toBeVisible();
     await expect(page.getByText("5")).toBeVisible();
-    await expect(page.getByText("Łącznie recenzji")).toBeVisible();
+    await expect(page.getByText("Łącznie powtórek")).toBeVisible();
     await expect(page.getByText("10")).toBeVisible();
     await expect(page.getByText("Poprawność")).toBeVisible();
     await expect(page.getByText("80%")).toBeVisible();
