@@ -26,15 +26,15 @@ describe("StatsService.getPerformanceStats", () => {
   it("returns aggregated stats without daily data", async () => {
     const { supabase } = createSupabaseStub();
 
-    supabase.from = vi.fn().mockReturnValue({
-      select: vi.fn().mockResolvedValue({
-        data: [{ total_reviews: 12, correct_percentage: 75.5 }],
-        error: null,
-      }),
+    // Mock the get_performance_stats view query
+    const mockSelect = vi.fn().mockResolvedValue({
+      data: [{ total_reviews: 12, correct_percentage: 75.5 }],
+      error: null,
     });
 
-    // ensure daily query not executed
-    supabase.from = vi.fn();
+    supabase.from = vi.fn().mockReturnValue({
+      select: mockSelect,
+    });
 
     const service = createStatsService(supabase);
     const res = await service.getPerformanceStats("u1");
@@ -50,15 +50,14 @@ describe("StatsService.getPerformanceStats", () => {
   it("includes daily stats when requested", async () => {
     const { supabase, builder } = createSupabaseStub();
 
-    supabase.from = vi.fn().mockReturnValue({
-      select: vi.fn().mockResolvedValue({
-        data: [{ total_reviews: 2, correct_percentage: 50 }],
-        error: null,
-      }),
+    // Mock the get_performance_stats view query
+    const mockAggSelect = vi.fn().mockResolvedValue({
+      data: [{ total_reviews: 2, correct_percentage: 50 }],
+      error: null,
     });
 
-    // Mock daily stats query
-    builder.select.mockResolvedValueOnce({
+    // Mock the daily_review_stats view query
+    const mockDailySelect = vi.fn().mockResolvedValue({
       data: [
         {
           review_date: "2025-06-17",
@@ -69,7 +68,11 @@ describe("StatsService.getPerformanceStats", () => {
       error: null,
     });
 
-    supabase.from = vi.fn().mockReturnValue(builder);
+    // Mock both from() calls
+    supabase.from = vi
+      .fn()
+      .mockReturnValueOnce({ select: mockAggSelect }) // for get_performance_stats
+      .mockReturnValueOnce({ select: mockDailySelect }); // for daily_review_stats
 
     const service = createStatsService(supabase);
     const res = await service.getPerformanceStats("u2", { includeDaily: true });
@@ -78,6 +81,8 @@ describe("StatsService.getPerformanceStats", () => {
     expect(res.value.dailyStats?.length).toBe(1);
     expect(res.value.dailyStats?.[0]).toMatchObject({
       reviewDate: "2025-06-17",
+      cardsReviewed: 5,
+      meanQuality: 4.25,
     });
   });
 
@@ -99,21 +104,25 @@ describe("StatsService.getPerformanceStats", () => {
   });
 
   it("returns Result.error when daily query fails", async () => {
-    const { supabase, builder } = createSupabaseStub();
+    const { supabase } = createSupabaseStub();
 
-    supabase.from = vi.fn().mockReturnValue({
-      select: vi.fn().mockResolvedValue({
-        data: [{ total_reviews: 0, correct_percentage: 0 }],
-        error: null,
-      }),
+    // Mock successful aggregate query
+    const mockAggSelect = vi.fn().mockResolvedValue({
+      data: [{ total_reviews: 0, correct_percentage: 0 }],
+      error: null,
     });
 
-    builder.select.mockResolvedValueOnce({
+    // Mock failed daily query
+    const mockDailySelect = vi.fn().mockResolvedValue({
       data: [],
       error: { message: "view error" },
     });
 
-    supabase.from = vi.fn().mockReturnValue(builder);
+    // Mock both from() calls
+    supabase.from = vi
+      .fn()
+      .mockReturnValueOnce({ select: mockAggSelect }) // for get_performance_stats
+      .mockReturnValueOnce({ select: mockDailySelect }); // for daily_review_stats
 
     const service = createStatsService(supabase);
     const res = await service.getPerformanceStats("u4", { includeDaily: true });

@@ -23,6 +23,8 @@ interface FlashcardWithTags {
   created_at: string;
   updated_at: string;
   tags: TagWithName[];
+  ease_factor: number;
+  interval: number;
 }
 
 // For listing with next_review_date (non-nullable)
@@ -261,6 +263,8 @@ export function createFlashcardService(supabase: SupabaseClient<Database>) {
           front: f.front,
           back: f.back,
           next_review_date: f.next_review_date,
+          ease_factor: f.ease_factor,
+          interval: f.interval,
           tags: f.tags.map((t) => ({ id: t.tag.id, name: t.tag.name })),
         }));
         return Result.ok({

@@ -66,7 +66,7 @@ describe("ReviewService", () => {
       const cmd: SubmitReviewCommand = { flashcardId: "abc", quality: 4 };
       const result = await service.processReview(cmd);
 
-      expect(supabase.rpc).toHaveBeenCalledWith("public.process_flashcard_review", {
+      expect(supabase.rpc).toHaveBeenCalledWith("process_flashcard_review", {
         p_flashcard_id: "abc",
         p_quality: 4,
       });
