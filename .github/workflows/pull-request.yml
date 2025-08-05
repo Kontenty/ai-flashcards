@@ -20,7 +20,7 @@ jobs:
       - name: Common setup
         uses: ./.github/actions/common-setup
       - name: Lint code
-        run: pnpm vitest run -u
+        run: pnpm run lint
 
   unit-test:
     name: Unit Tests
@@ -31,7 +31,7 @@ jobs:
       - name: Common setup
         uses: ./.github/actions/common-setup
       - name: Run unit tests
-        run: pnpm run test:unit
+        run: pnpm vitest run -u
 
   e2e-test:
     name: E2E Tests
