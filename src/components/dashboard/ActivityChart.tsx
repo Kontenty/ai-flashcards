@@ -10,6 +10,7 @@ interface ActivityChartProps {
 // ActivityChart displays a bar chart of reviews per day
 export function ActivityChart({ data }: ActivityChartProps) {
   const config = { reviews: { color: "#3b82f6" } };
+  if (!data?.length) return null;
   return (
     <ChartContainer id="activity" config={config} className="w-full">
       <BarChart data={data} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>

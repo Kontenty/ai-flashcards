@@ -1,14 +1,16 @@
-import React, { useState } from "react";
+import React, { useState, lazy, Suspense } from "react";
 import { useDashboardData } from "@/hooks/useDashboardData";
 import { StatsWidgets } from "./StatsWidgets";
 import { QuickActions } from "./QuickActions";
-// import { ActivityChart } from "./ActivityChart";
 import { RecentFlashcardsList } from "./RecentFlashcardsList";
 import { DueFlashcardsList } from "./DueFlashcardsList";
 import { Toaster } from "@/components/ui/sonner";
 import { Button } from "@/components/ui/button";
 import { Plus, Zap, Repeat } from "lucide-react";
 import { CreateFlashcardModal } from "@/components/flashcards/CreateFlashcardModal";
+const ActivityChart = lazy(() =>
+  import("./ActivityChart").then((mod) => ({ default: mod.ActivityChart })),
+);
 
 export function DashboardView() {
   const { data, loading, error, reload } = useDashboardData();
@@ -72,7 +74,11 @@ export function DashboardView() {
         <QuickActions actions={actions} />
       </div>
       {/* TODO: fix activity chart */}
-      <div className="mb-6">{/* <ActivityChart data={data.activity} /> */}</div>
+      <div className="mb-6">
+        <Suspense fallback={<div>Loading...</div>}>
+          <ActivityChart data={data.activity} />
+        </Suspense>
+      </div>
       <div className="grid gap-6 md:grid-cols-2 mb-6">
         <RecentFlashcardsList items={data.recent} />
         <DueFlashcardsList items={data.due} />
