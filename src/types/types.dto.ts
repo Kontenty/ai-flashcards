@@ -75,7 +75,7 @@ export interface PaginationDto {
 /** Single item inside FlashcardListResponseDto.items */
 export type FlashcardListItemDto = Pick<
   Tables<"flashcards">,
-  "id" | "front" | "back" | "next_review_date"
+  "id" | "front" | "back" | "next_review_date" | "ease_factor" | "interval"
 > & {
   tags: TagDto[];
 };

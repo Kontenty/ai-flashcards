@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { toast } from "sonner";
-import type { CreateFlashcardCommand } from "@/types";
+import type { CreateFlashcardCommand, FlashcardListItemDto } from "@/types";
 import { useFlashcards } from "@/hooks/useFlashcards";
 import type { FilterState } from "@/hooks/useFlashcards";
 import { useTags } from "@/hooks/useTags";
@@ -22,9 +22,9 @@ const ListFlashcardsView: React.FC = () => {
 
   // Modal and deletion state
   const [isEditOpen, setIsEditOpen] = useState(false);
-  const [selectedFlashcard, setSelectedFlashcard] = useState<
-    (CreateFlashcardCommand & { id?: string }) | undefined
-  >(undefined);
+  const [selectedFlashcard, setSelectedFlashcard] = useState<FlashcardListItemDto | undefined>(
+    undefined,
+  );
   const [toDeleteId, setToDeleteId] = useState<string | null>(null);
 
   // Handlers
@@ -48,8 +48,8 @@ const ListFlashcardsView: React.FC = () => {
         const json = await res.json();
         throw new Error(getStringField(json, "message", res.statusText));
       }
-      const data = (await res.json()) as { front: string; back: string };
-      setSelectedFlashcard({ id, front: data.front, back: data.back, tagIds: [] });
+      const data = (await res.json()) as FlashcardListItemDto;
+      setSelectedFlashcard(data);
       setIsEditOpen(true);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : String(err));
@@ -67,6 +67,31 @@ const ListFlashcardsView: React.FC = () => {
   const closeEditModal = () => {
     setIsEditOpen(false);
     setSelectedFlashcard(undefined);
+  };
+
+  const handleEditSave = async ({ front, back, tagIds }: CreateFlashcardCommand) => {
+    try {
+      const method = selectedFlashcard?.id ? "PUT" : "POST";
+      const url = selectedFlashcard?.id
+        ? `/api/flashcards/${selectedFlashcard.id}`
+        : "/api/flashcards";
+      const res = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ front, back, tagIds }),
+      });
+      if (!res.ok) {
+        const json = await res.json();
+        throw new Error(getStringField(json, "message", res.statusText));
+      }
+      toast.success("Flashcard saved successfully");
+      reload();
+      closeEditModal();
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      toast.error(msg);
+      throw err;
+    }
   };
 
   const handleConfirmDelete = async () => {
@@ -121,34 +146,17 @@ const ListFlashcardsView: React.FC = () => {
       <EditCardModal
         isOpen={isEditOpen}
         card={
-          selectedFlashcard
-            ? { front: selectedFlashcard.front, back: selectedFlashcard.back }
-            : { front: "", back: "" }
-        }
-        onSave={async ({ front, back, tagIds }) => {
-          try {
-            const method = selectedFlashcard?.id ? "PUT" : "POST";
-            const url = selectedFlashcard?.id
-              ? `/api/flashcards/${selectedFlashcard.id}`
-              : "/api/flashcards";
-            const res = await fetch(url, {
-              method,
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ front, back, tagIds }),
-            });
-            if (!res.ok) {
-              const json = await res.json();
-              throw new Error(getStringField(json, "message", res.statusText));
-            }
-            toast.success("Flashcard saved successfully");
-            reload();
-            closeEditModal();
-          } catch (err) {
-            const msg = err instanceof Error ? err.message : String(err);
-            toast.error(msg);
-            throw err;
+          selectedFlashcard ?? {
+            id: "",
+            front: "",
+            back: "",
+            tags: [],
+            next_review_date: new Date().toISOString(),
+            ease_factor: 2.5,
+            interval: 1,
           }
-        }}
+        }
+        onSave={handleEditSave}
         onClose={closeEditModal}
       />
       <DeleteConfirmDialog
