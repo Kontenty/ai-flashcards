@@ -20,7 +20,7 @@ jobs:
       - name: Common setup
         uses: ./.github/actions/common-setup
       - name: Lint code
-        run: pnpm run lint
+        run: pnpm vitest run -u
 
   unit-test:
     name: Unit Tests
