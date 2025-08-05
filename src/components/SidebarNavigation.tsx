@@ -25,12 +25,12 @@ const NAV_ITEMS: NavItem[] = [
     icon: LayoutDashboard,
   },
   {
-    label: "Flashcards",
+    label: "Fiszki",
     href: "/flashcards",
     icon: Layers,
   },
   {
-    label: "Reviews",
+    label: "Powtórki",
     href: "/reviews",
     icon: Repeat,
   },
