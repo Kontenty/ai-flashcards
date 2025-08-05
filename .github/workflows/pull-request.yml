@@ -30,6 +30,8 @@ jobs:
         uses: actions/checkout@v4
       - name: Common setup
         uses: ./.github/actions/common-setup
+      - name: Update snapshots
+        run: pnpm vitest -u
       - name: Run unit tests
         run: pnpm run test:unit
 
