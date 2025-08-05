@@ -172,10 +172,11 @@ Aplikacja 10xFlashCards została zaprojektowana jako nowoczesna, responsywna apl
 ### 3.3. Powtórki
 
 1. Wejście w tryb powtórek
-2. Przegląd fiszek sekwencyjnie
-3. Ocenianie przypomnienia
-4. Podsumowanie sesji
-5. Powrót do dashboardu
+2. Wybranie fiszek po tagach lub tych do powtórki
+3. Przegląd fiszek sekwencyjnie
+4. Ocenianie przypomnienia
+5. Podsumowanie sesji
+6. Powrót do dashboardu
 
 ## 4. Układ i struktura nawigacji
 
