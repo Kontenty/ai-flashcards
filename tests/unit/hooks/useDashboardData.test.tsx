@@ -4,6 +4,7 @@ import { useDashboardData } from "../../../src/hooks/useDashboardData";
 import { server } from "../../mocks/server";
 import { http, HttpResponse } from "msw";
 import { vi, describe, it, beforeEach, expect } from "vitest";
+
 vi.mock("../../../src/db/supabase.client", () => ({
   supabaseClient: {
     auth: { getSession: vi.fn().mockResolvedValue({ data: { session: null }, error: null }) },
