@@ -41,7 +41,7 @@ jobs:
       - name: Common setup
         uses: ./.github/actions/common-setup
       - name: Run unit tests
-        run: pnpm vitest run -u
+        run: pnpm run test:unit
 
   build:
     name: Build and deploy to Cloudflare
@@ -62,7 +62,7 @@ jobs:
       - name: Copy assets ignore into dist
         run: cp public/.assetsignore dist/.assetsignore
         shell: bash
-      - name: Publish to Cloudflare Pages
+      - name: Publish to Cloudflare Workers
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}

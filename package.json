@@ -12,7 +12,7 @@
     "astro": "astro",
     "lint": "eslint . --ext .ts,.tsx",
     "lint:fix": "eslint . --ext .ts,.tsx --fix",
-    "test:unit": "vitest",
+    "test:unit": "vitest run -u",
     "test:unit:watch": "vitest --watch",
     "test:coverage": "vitest --coverage",
     "test:e2e": "cross-env NODE_ENV=test playwright test",
