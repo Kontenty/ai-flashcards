@@ -126,7 +126,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
     });
 
     return new Response(JSON.stringify(response), {
-      status: 201,
+      status: 200,
       headers: {
         ...securityHeaders,
         "Content-Type": "application/json",

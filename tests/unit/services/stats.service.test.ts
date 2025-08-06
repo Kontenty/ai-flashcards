@@ -1,64 +1,133 @@
+import { describe, it, expect, vi } from "vitest";
 import { createStatsService } from "@/lib/services/stats.service";
-import type { SupabaseClient } from "@supabase/supabase-js";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import type { Mock } from "vitest";
 
-const supabaseMock = {
-  from: vi.fn(() => supabaseMock),
-  select: vi.fn(() => supabaseMock),
-  eq: vi.fn(),
-  rpc: vi.fn(),
-};
+function createSupabaseStub() {
+  const builder = {
+    select: vi.fn(),
+  } as unknown as {
+    select: Mock<
+      (...args: string[]) => Promise<{
+        data: { review_date: string; cards_reviewed: number; mean_quality: number }[] | null;
+        error: { message: string } | null;
+      }>
+    >;
+  };
 
-describe("StatsService", () => {
-  let statsService: ReturnType<typeof createStatsService>;
+  const supabase = {
+    rpc: vi.fn(),
+    from: vi.fn().mockReturnValue(builder),
+  } as unknown as Parameters<typeof createStatsService>[0];
 
-  beforeEach(() => {
-    statsService = createStatsService(supabaseMock as unknown as SupabaseClient);
+  return { supabase, builder };
+}
+
+describe("StatsService.getPerformanceStats", () => {
+  it("returns aggregated stats without daily data", async () => {
+    const { supabase } = createSupabaseStub();
+
+    // Mock the get_performance_stats view query
+    const mockSelect = vi.fn().mockResolvedValue({
+      data: [{ total_reviews: 12, correct_percentage: 75.5 }],
+      error: null,
+    });
+
+    supabase.from = vi.fn().mockReturnValue({
+      select: mockSelect,
+    });
+
+    const service = createStatsService(supabase);
+    const res = await service.getPerformanceStats("u1");
+
+    expect(res.isSuccess).toBe(true);
+    expect(res.value).toMatchObject({
+      totalReviews: 12,
+      correctPercentage: 75.5,
+    });
+    expect(res.value.dailyStats).toBeUndefined();
   });
 
-  afterEach(() => {
-    vi.clearAllMocks();
-  });
+  it("includes daily stats when requested", async () => {
+    const { supabase } = createSupabaseStub();
 
-  describe("getTagStats", () => {
-    it("should return tag statistics for a user", async () => {
-      const userId = "user-123";
-      const mockTags = [
-        { name: "TagA", flashcard_tags: [{ count: 10 }] },
-        { name: "TagB", flashcard_tags: [{ count: 5 }] },
-        { name: "TagC", flashcard_tags: [] },
-      ];
+    // Mock the get_performance_stats view query
+    const mockAggSelect = vi.fn().mockResolvedValue({
+      data: [{ total_reviews: 2, correct_percentage: 50 }],
+      error: null,
+    });
 
-      supabaseMock.eq.mockResolvedValue({ data: mockTags, error: null });
+    // Mock the daily_review_stats view query
+    const mockDailySelect = vi.fn().mockResolvedValue({
+      data: [
+        {
+          review_date: "2025-06-17",
+          cards_reviewed: 5,
+          mean_quality: 4.25,
+        },
+      ],
+      error: null,
+    });
 
-      const result = await statsService.getTagStats(userId);
+    // Mock both from() calls
+    supabase.from = vi
+      .fn()
+      .mockReturnValueOnce({ select: mockAggSelect }) // for get_performance_stats
+      .mockReturnValueOnce({ select: mockDailySelect }); // for daily_review_stats
 
-      expect(supabaseMock.from).toHaveBeenCalledWith("tags");
-      expect(supabaseMock.select).toHaveBeenCalled();
-      expect(supabaseMock.eq).toHaveBeenCalledWith("flashcard_tags.flashcards.user_id", userId);
-      expect(result.isSuccess).toBe(true);
-      if (result.isSuccess) {
-        expect(result.value).toEqual([
-          { tag: "TagA", count: 10 },
-          { tag: "TagB", count: 5 },
-        ]);
-      }
+    const service = createStatsService(supabase);
+    const res = await service.getPerformanceStats("u2", { includeDaily: true });
+
+    expect(res.isSuccess).toBe(true);
+    expect(res.value.dailyStats?.length).toBe(1);
+    expect(res.value.dailyStats?.[0]).toMatchObject({
+      reviewDate: "2025-06-17",
+      cardsReviewed: 5,
+      meanQuality: 4.25,
     });
   });
 
-  describe("getPerformanceStats", () => {
-    it("should return performance statistics for a user", async () => {
-      const userId = "user-123";
-      const mockStats = [{ totalReviewed: 100, correctPercent: 85 }];
-      supabaseMock.rpc.mockResolvedValue({ data: mockStats, error: null });
+  it("returns Result.error when RPC fails", async () => {
+    const { supabase } = createSupabaseStub();
 
-      const result = await statsService.getPerformanceStats(userId);
-
-      expect(supabaseMock.rpc).toHaveBeenCalledWith("get_performance_stats", { p_user_id: userId });
-      expect(result.isSuccess).toBe(true);
-      if (result.isSuccess) {
-        expect(result.value).toEqual({ totalReviewed: 100, correctPercent: 85 });
-      }
+    supabase.from = vi.fn().mockReturnValue({
+      select: vi.fn().mockResolvedValue({
+        data: null,
+        error: { message: "rpc fail" },
+      }),
     });
+
+    const service = createStatsService(supabase);
+    const res = await service.getPerformanceStats("u3");
+
+    expect(res.isError).toBe(true);
+    expect(res.error).toContain("rpc fail");
+  });
+
+  it("returns Result.error when daily query fails", async () => {
+    const { supabase } = createSupabaseStub();
+
+    // Mock successful aggregate query
+    const mockAggSelect = vi.fn().mockResolvedValue({
+      data: [{ total_reviews: 0, correct_percentage: 0 }],
+      error: null,
+    });
+
+    // Mock failed daily query
+    const mockDailySelect = vi.fn().mockResolvedValue({
+      data: [],
+      error: { message: "view error" },
+    });
+
+    // Mock both from() calls
+    supabase.from = vi
+      .fn()
+      .mockReturnValueOnce({ select: mockAggSelect }) // for get_performance_stats
+      .mockReturnValueOnce({ select: mockDailySelect }); // for daily_review_stats
+
+    const service = createStatsService(supabase);
+    const res = await service.getPerformanceStats("u4", { includeDaily: true });
+
+    expect(res.isError).toBe(true);
+    expect(res.error).toContain("view error");
   });
 });

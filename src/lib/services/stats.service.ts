@@ -1,44 +1,81 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
+import type { Database } from "@/db/database.types";
 import { Result } from "@/lib/utils/result";
-import type { PerformanceStatsDto, TagStatisticDto } from "@/types";
+import type { PerformanceStatsDto } from "@/types";
 
-export function createStatsService(supabase: SupabaseClient) {
+/**
+ * Factory for statistics-related operations. Encapsulates all database access
+ * needed by the *performance statistics* API so that the route handler can stay
+ * completely framework-agnostic.
+ */
+export function createStatsService(db: SupabaseClient<Database>) {
   return {
-    async getTagStats(userId: string): Promise<Result<TagStatisticDto[], Error>> {
-      const { data, error } = await supabase
-        .from("tags")
-        .select(
-          `
-            name,
-            flashcard_tags(count)
-          `,
-        )
-        .eq("flashcard_tags.flashcards.user_id", userId);
+    /**
+     * Returns aggregated *performance statistics* for the supplied user.
+     *
+     * Aggregates are fetched from the Postgres RPC function
+     * `get_performance_stats` which is expected to return a single row with the
+     * following columns (snake_case):
+     *   - total_reviews        (integer)
+     *   - correct_percentage   (numeric)
+     *
+     * When `opts.includeDaily === true` an additional query against the view
+     * `daily_review_stats` is executed in parallel.
+     */
+    async getPerformanceStats(
+      userId: string,
+      opts: { includeDaily?: boolean } = {},
+    ): Promise<Result<PerformanceStatsDto, string>> {
+      try {
+        // 1. Run queries in parallel – Postgres will handle them concurrently
+        const aggPromise = db
+          .from("get_performance_stats")
+          .select("total_reviews,correct_percentage");
 
-      if (error) {
-        return Result.error(new Error(error.message));
+        const dailyPromise = opts.includeDaily
+          ? db.from("daily_review_stats").select("review_date,cards_reviewed,mean_quality")
+          : Promise.resolve({ data: null, error: null });
+
+        const [aggRes, dailyRes] = await Promise.all([aggPromise, dailyPromise]);
+
+        // 2. Handle database-level errors early
+        if (aggRes.error) {
+          return Result.error(aggRes.error.message);
+        }
+        if (
+          dailyRes &&
+          "error" in dailyRes &&
+          (dailyRes as { error?: { message: string } }).error
+        ) {
+          // Narrowing for the generic Postgres response shape
+          // Handle possible null for dailyRes.error
+          const errorMessage =
+            (dailyRes as { error?: { message?: string } })?.error?.message ??
+            "Unknown error occurred while fetching daily stats";
+          return Result.error(errorMessage);
+        }
+
+        // 3. Map response to DTO
+        const { total_reviews, correct_percentage } = (Array.isArray(aggRes.data) &&
+          aggRes.data[0]) || {
+          total_reviews: 0,
+          correct_percentage: 0,
+        };
+
+        return Result.ok<PerformanceStatsDto, string>({
+          totalReviews: total_reviews ?? 0,
+          correctPercentage: Number(correct_percentage ?? 0),
+          dailyStats: opts.includeDaily
+            ? dailyRes?.data?.map((row) => ({
+                reviewDate: row.review_date,
+                cardsReviewed: row.cards_reviewed ?? 0,
+                meanQuality: Number(row.mean_quality),
+              }))
+            : undefined,
+        });
+      } catch (err) {
+        return Result.error(err instanceof Error ? err.message : "Unknown error occurred");
       }
-
-      const tagStats: TagStatisticDto[] = data
-        .map((tag: { name: string; flashcard_tags: { count: number }[] }) => ({
-          tag: tag.name,
-          count: tag.flashcard_tags[0]?.count ?? 0,
-        }))
-        .filter((tag) => tag.count > 0);
-
-      return Result.ok(tagStats);
-    },
-
-    async getPerformanceStats(userId: string): Promise<Result<PerformanceStatsDto, Error>> {
-      const { data, error } = await supabase.rpc("get_performance_stats", {
-        p_user_id: userId,
-      });
-
-      if (error) {
-        return Result.error(new Error(error.message));
-      }
-
-      return Result.ok(data[0]);
     },
   };
 }

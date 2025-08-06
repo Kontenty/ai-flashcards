@@ -1,14 +1,16 @@
-import React, { useState } from "react";
+import React, { useState, lazy, Suspense } from "react";
 import { useDashboardData } from "@/hooks/useDashboardData";
 import { StatsWidgets } from "./StatsWidgets";
 import { QuickActions } from "./QuickActions";
-import { ActivityChart } from "./ActivityChart";
 import { RecentFlashcardsList } from "./RecentFlashcardsList";
 import { DueFlashcardsList } from "./DueFlashcardsList";
 import { Toaster } from "@/components/ui/sonner";
 import { Button } from "@/components/ui/button";
 import { Plus, Zap, Repeat } from "lucide-react";
 import { CreateFlashcardModal } from "@/components/flashcards/CreateFlashcardModal";
+const ActivityChart = lazy(() =>
+  import("./ActivityChart").then((mod) => ({ default: mod.ActivityChart })),
+);
 
 export function DashboardView() {
   const { data, loading, error, reload } = useDashboardData();
@@ -45,12 +47,11 @@ export function DashboardView() {
 
   const statsTiles = [
     { label: "Łącznie fiszek", value: data.totalFlashcards },
-    { label: "Łącznie recenzji", value: data.stats.totalReviewed },
-    { label: "Poprawność", value: `${data.stats.correctPercent}%` },
+    { label: "Łącznie powtórek", value: data.stats.totalReviews },
+    { label: "Poprawność", value: `${data.stats.correctPercentage.toFixed(1)}%` },
     {
       label: "Tagów",
       value: data.tagStats.length,
-      tooltip: data.tagStats.map((t) => `${t.tag}: ${t.count}`).join(", "),
     },
   ];
 
@@ -72,8 +73,11 @@ export function DashboardView() {
       <div className="mb-6">
         <QuickActions actions={actions} />
       </div>
+      {/* TODO: fix activity chart */}
       <div className="mb-6">
-        <ActivityChart data={data.activity} />
+        <Suspense fallback={<div>Loading...</div>}>
+          <ActivityChart data={data.activity} />
+        </Suspense>
       </div>
       <div className="grid gap-6 md:grid-cols-2 mb-6">
         <RecentFlashcardsList items={data.recent} />

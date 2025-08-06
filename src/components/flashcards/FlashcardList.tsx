@@ -22,6 +22,7 @@ interface FlashcardListProps {
   onEdit: (index: number) => void;
   onReject: (index: number) => void;
   onBulkSaveSuccess: () => void;
+  tagIds: string[];
 }
 
 export function FlashcardList({
@@ -29,6 +30,7 @@ export function FlashcardList({
   onEdit,
   onReject,
   onBulkSaveSuccess,
+  tagIds,
 }: Readonly<FlashcardListProps>) {
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -40,7 +42,7 @@ export function FlashcardList({
     const cards: CreateFlashcardCommand[] = suggestions.map((suggestion) => ({
       front: suggestion.front,
       back: suggestion.back,
-      tagIds: [],
+      tagIds,
     }));
 
     try {

@@ -11,12 +11,30 @@ import { Textarea } from "@/components/ui/textarea";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import type { SuggestionDto, CreateFlashcardCommand } from "@/types";
+import type { CreateFlashcardCommand } from "@/types";
 import { MAX_BACK_LENGTH, MAX_FRONT_LENGTH } from "@/constants";
+import { TagSelector } from "./TagSelector";
+import type { TagOption } from "@/hooks/useTags";
+
+interface EditableCard {
+  front: string;
+  back: string;
+  /**
+   * Optional tags array – present for existing flashcards (FlashcardListItemDto)
+   * and absent for fresh AI suggestions (SuggestionDto).
+   */
+  tags?: TagOption[];
+}
 
 interface EditCardModalProps {
   isOpen: boolean;
-  card: SuggestionDto;
+  /**
+   * Card coming either from the generated suggestions list or an existing
+   * flashcard selected from the table. We only need the writable fields
+   * (front/back/tags) therefore we accept any object that conforms to the
+   * EditableCard shape.
+   */
+  card: EditableCard;
   onSave: (card: CreateFlashcardCommand) => Promise<void>;
   onClose: () => void;
 }
@@ -24,12 +42,14 @@ interface EditCardModalProps {
 export function EditCardModal({ isOpen, card, onSave, onClose }: Readonly<EditCardModalProps>) {
   const [front, setFront] = useState(card.front);
   const [back, setBack] = useState(card.back);
+  const [tags, setTags] = useState<TagOption[]>(card.tags ?? []);
   const [error, setError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     setFront(card.front);
     setBack(card.back);
+    setTags(card.tags ?? []);
     setError(null);
   }, [card]);
 
@@ -60,7 +80,7 @@ export function EditCardModal({ isOpen, card, onSave, onClose }: Readonly<EditCa
     try {
       setIsSaving(true);
       setError(null);
-      await onSave({ front, back, tagIds: [] });
+      await onSave({ front, back, tagIds: tags.map((t) => t.id) });
       toast.success("Flashcard saved successfully");
       onClose();
     } catch (err) {
@@ -70,7 +90,7 @@ export function EditCardModal({ isOpen, card, onSave, onClose }: Readonly<EditCa
     } finally {
       setIsSaving(false);
     }
-  }, [front, back, onSave, onClose]);
+  }, [front, back, onSave, onClose, tags]);
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
@@ -148,6 +168,12 @@ export function EditCardModal({ isOpen, card, onSave, onClose }: Readonly<EditCa
                 {back.length}/{MAX_BACK_LENGTH}
               </div>
             </div>
+          </div>
+          <div className="space-y-2">
+            <label htmlFor="tags" className="text-sm font-medium">
+              Tags
+            </label>
+            <TagSelector value={tags} onChange={setTags} />
           </div>
 
           {error && (

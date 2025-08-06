@@ -17,17 +17,20 @@ export function useDashboardData() {
     setError(undefined);
     try {
       const totalFetch = fetch(`/api/flashcards?page=1&pageSize=1`, { signal });
-      const performanceFetch = fetch(`/api/stats/performance`, { signal });
+      const performanceFetch = fetch(`/api/stats/performance?include=daily_stats`, { signal });
       const tagsFetch = fetch(`/api/stats/tags`, { signal });
       const recentFetch = fetch(`/api/flashcards?page=1&pageSize=5&sort=created_desc`, {
         signal,
       });
       const dueFetch = fetch(`/api/reviews/session`, { signal });
-      const activityFetch = fetch(`/api/reviews/session?history=14`, { signal });
 
-      const [totalRes, performanceRes, tagsRes, recentRes, dueRes, activityRes] = await Promise.all(
-        [totalFetch, performanceFetch, tagsFetch, recentFetch, dueFetch, activityFetch],
-      );
+      const [totalRes, performanceRes, tagsRes, recentRes, dueRes] = await Promise.all([
+        totalFetch,
+        performanceFetch,
+        tagsFetch,
+        recentFetch,
+        dueFetch,
+      ]);
 
       if (!totalRes.ok) throw new Error("Failed to load total flashcards");
       if (!performanceRes.ok) throw new Error("Failed to load performance stats");
@@ -40,17 +43,16 @@ export function useDashboardData() {
       const tagsJson = (await tagsRes.json()) as TagStatisticDto[];
       const recentJson = (await recentRes.json()) as FlashcardListResponseDto;
       const dueJson = (await dueRes.json()) as ReviewSessionResponseDto;
-      let activityJson: ActivityPoint[] = [];
-      if (activityRes.ok) {
-        try {
-          activityJson = (await activityRes.json()) as ActivityPoint[];
-        } catch {
-          activityJson = [];
-        }
-      }
+      const activityJson: ActivityPoint[] = (performanceJson?.dailyStats ?? [])
+        .map((d) =>
+          d.reviewDate !== null
+            ? { date: d.reviewDate, reviews: d.cardsReviewed, meanQuality: d.meanQuality }
+            : undefined,
+        )
+        .filter((p): p is ActivityPoint => p !== undefined);
 
       setData({
-        totalFlashcards: totalJson.pagination.total,
+        totalFlashcards: totalJson.pagination.totalItems,
         stats: performanceJson,
         tagStats: tagsJson,
         recent: recentJson.items,

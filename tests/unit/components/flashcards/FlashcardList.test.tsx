@@ -36,6 +36,7 @@ describe("FlashcardList", () => {
         onEdit={onEdit}
         onReject={onReject}
         onBulkSaveSuccess={onBulkSaveSuccess}
+        tagIds={[]}
       />,
     );
     expect(
@@ -52,6 +53,7 @@ describe("FlashcardList", () => {
         onEdit={onEdit}
         onReject={onReject}
         onBulkSaveSuccess={onBulkSaveSuccess}
+        tagIds={[]}
       />,
     );
     const editButtons = screen.getAllByRole("button", { name: /edit/i });
@@ -66,6 +68,7 @@ describe("FlashcardList", () => {
         onEdit={onEdit}
         onReject={onReject}
         onBulkSaveSuccess={onBulkSaveSuccess}
+        tagIds={[]}
       />,
     );
     const rejectButtons = screen.getAllByRole("button", { name: /reject/i });
@@ -94,6 +97,7 @@ describe("FlashcardList", () => {
         onEdit={onEdit}
         onReject={onReject}
         onBulkSaveSuccess={onBulkSaveSuccess}
+        tagIds={[]}
       />,
     );
     // Open bulk save confirmation
@@ -140,6 +144,7 @@ describe("FlashcardList", () => {
         onEdit={onEdit}
         onReject={onReject}
         onBulkSaveSuccess={onBulkSaveSuccess}
+        tagIds={[]}
       />,
     );
     // Open bulk save confirmation

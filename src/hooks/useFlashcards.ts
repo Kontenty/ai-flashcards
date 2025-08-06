@@ -15,7 +15,8 @@ export function useFlashcards(initialFilter: FilterState) {
   const [pagination, setPagination] = useState<PaginationDto>({
     page: initialFilter.page,
     pageSize: initialFilter.pageSize,
-    total: 0,
+    totalItems: 0,
+    totalPages: 0,
   });
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);

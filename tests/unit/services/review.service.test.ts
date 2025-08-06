@@ -1,46 +1,87 @@
-import { reviewService } from "../../../src/lib/services/review.service";
-import { supabaseClient } from "../../../src/db/supabase.client";
-import { vi, describe, it, beforeEach, expect, type Mock } from "vitest";
+import { describe, it, expect, vi } from "vitest";
+import { createReviewService, type SubmitReviewCommand } from "@/lib/services/review.service";
 
-vi.mock("../../../src/db/supabase.client", () => {
-  return {
-    supabaseClient: {
-      from: vi.fn(),
-    },
+/**
+ * Creates a lightweight stub of the Supabase JS client containing only the
+ * members that the ReviewService interacts with. Each test can mutate the
+ * spies to simulate various scenarios.
+ */
+function createSupabaseStub() {
+  // Builder chain returned from supabase.from(...)
+  const builder = {
+    select: vi.fn().mockReturnThis(),
+    eq: vi.fn().mockReturnThis(),
+    lte: vi.fn().mockReturnThis(),
   };
-});
 
-describe("ReviewService.getDueCards", () => {
-  const mockData = [{ id: "1", front: "Sample Card", interval: 5, ease_factor: 2.6 }];
+  const supabase = {
+    auth: {
+      getUser: vi.fn().mockResolvedValue({ data: { user: { id: "user-1" } } }),
+    },
+    from: vi.fn().mockReturnValue(builder),
+    rpc: vi.fn(),
+  } as unknown as Parameters<typeof createReviewService>[0];
 
-  beforeEach(() => {
-    const builder = {
-      select: vi.fn().mockReturnThis(),
-      eq: vi.fn().mockReturnThis(),
-      lte: vi.fn().mockReturnThis(),
-      order: vi.fn().mockReturnThis(),
-      limit: vi.fn().mockReturnThis(),
-      then: (onFulfilled: (res: unknown) => void) => onFulfilled({ data: mockData, error: null }),
-    };
-    (supabaseClient.from as unknown as Mock).mockReturnValue(builder);
+  return { supabase, builder };
+}
+
+describe("ReviewService", () => {
+  describe("getDueFlashcards", () => {
+    it("returns cards on success", async () => {
+      const { supabase, builder } = createSupabaseStub();
+      // Simulate DB returning data
+      builder.select.mockReturnValueOnce({
+        eq: () => ({
+          lte: () => ({ data: [{ id: "c1", front: "F", back: "B" }], error: null }),
+        }),
+      });
+
+      const service = createReviewService(supabase);
+      const result = await service.getDueFlashcards();
+
+      expect(result.isSuccess).toBe(true);
+      expect(result.value[0]).toMatchObject({ id: "c1" });
+    });
+
+    it("propagates database errors via Result.error", async () => {
+      const { supabase, builder } = createSupabaseStub();
+      builder.select.mockReturnValueOnce({
+        eq: () => ({ lte: () => ({ data: null, error: new Error("db fail") }) }),
+      });
+
+      const service = createReviewService(supabase);
+      const result = await service.getDueFlashcards();
+
+      expect(result.isError).toBe(true);
+      expect(result.error).toContain("db fail");
+    });
   });
 
-  it("returns due cards when query succeeds", async () => {
-    const cards = await reviewService.getDueCards("user123");
-    expect(cards).toEqual(mockData);
-  });
+  describe("processReview", () => {
+    it("returns ok on success", async () => {
+      const { supabase } = createSupabaseStub();
+      supabase.rpc = vi.fn().mockResolvedValue({ error: null });
 
-  it("throws an error when query fails", async () => {
-    const errorBuilder = {
-      select: vi.fn().mockReturnThis(),
-      eq: vi.fn().mockReturnThis(),
-      lte: vi.fn().mockReturnThis(),
-      order: vi.fn().mockReturnThis(),
-      limit: vi.fn().mockReturnThis(),
-      then: (onFulfilled: (res: unknown) => void) =>
-        onFulfilled({ data: null, error: new Error("DB error") }),
-    };
-    (supabaseClient.from as unknown as Mock).mockReturnValue(errorBuilder);
-    await expect(reviewService.getDueCards("user123")).rejects.toThrow("DB error");
+      const service = createReviewService(supabase);
+      const cmd: SubmitReviewCommand = { flashcardId: "abc", quality: 4 };
+      const result = await service.processReview(cmd);
+
+      expect(supabase.rpc).toHaveBeenCalledWith("process_flashcard_review", {
+        p_flashcard_id: "abc",
+        p_quality: 4,
+      });
+      expect(result.isSuccess).toBe(true);
+    });
+
+    it("maps known error codes", async () => {
+      const { supabase } = createSupabaseStub();
+      supabase.rpc = vi.fn().mockResolvedValue({ error: { code: "22P02", message: "invalid" } });
+
+      const service = createReviewService(supabase);
+      const result = await service.processReview({ flashcardId: "x", quality: 3 });
+
+      expect(result.isError).toBe(true);
+      expect(result.error).toBe("Invalid flashcard ID");
+    });
   });
 });

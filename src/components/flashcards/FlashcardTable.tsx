@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import type { FlashcardListItemDto } from "@/types";
+import { Button } from "../ui/button";
+import { Pencil, Trash } from "lucide-react";
 
 interface FlashcardTableProps {
   items: FlashcardListItemDto[];
@@ -17,10 +19,10 @@ const FlashcardTable: React.FC<FlashcardTableProps> = ({ items, onEdit, onDelete
       <thead>
         <tr>
           <th className="border px-2 py-1"></th>
-          <th className="border px-2 py-1">Front</th>
-          <th className="border px-2 py-1">Back</th>
-          <th className="border px-2 py-1">Tags</th>
-          <th className="border px-2 py-1">Actions</th>
+          <th className="border px-2 py-1">Przód</th>
+          <th className="border px-2 py-1">Tył</th>
+          <th className="border px-2 py-1">Tagi</th>
+          <th className="border px-2 py-1">Akcje</th>
         </tr>
       </thead>
       <tbody>
@@ -37,14 +39,26 @@ const FlashcardTable: React.FC<FlashcardTableProps> = ({ items, onEdit, onDelete
                 </td>
                 <td className="border px-2 py-1">{truncatedFront}</td>
                 <td className="border px-2 py-1">{truncatedBack}</td>
-                <td className="border px-2 py-1">{item.tags.join(", ")}</td>
+                <td className="border px-2 py-1">{item.tags.map((t) => t.name).join(", ")}</td>
                 <td className="border px-2 py-1 space-x-2">
-                  <button onClick={() => onEdit(item.id)} className="text-blue-600">
-                    Edit
-                  </button>
-                  <button onClick={() => onDelete(item.id)} className="text-red-600">
-                    Delete
-                  </button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="size-8"
+                    onClick={() => onEdit(item.id)}
+                    title="Edytuj"
+                  >
+                    <Pencil className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="size-8"
+                    onClick={() => onDelete(item.id)}
+                    title="Usuń"
+                  >
+                    <Trash className="h-4 w-4 text-red-500" />
+                  </Button>
                 </td>
               </tr>
               {isExpanded && (
