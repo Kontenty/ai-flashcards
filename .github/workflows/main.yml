@@ -41,7 +41,7 @@ jobs:
       - name: Common setup
         uses: ./.github/actions/common-setup
       - name: Run unit tests
-        run: pnpm run test:unit
+        run: pnpm vitest run -u
 
   build:
     name: Build and deploy to Cloudflare
