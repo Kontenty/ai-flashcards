@@ -1,8 +1,9 @@
 # 10x Flashcards
 
-![Version](https://img.shields.io/badge/version-0.0.1-blue)
-![Build Status](https://github.com/<owner>/<repo>/actions/workflows/ci.yml/badge.svg)
-![License](https://img.shields.io/badge/license-unlicensed-lightgrey)
+![Version](https://img.shields.io/badge/version-0.1.0-blue)
+![Build Status](https://github.com/kontenty/ai-flashcards/actions/workflows/main.yml/badge.svg)
+
+### https://ai-flashcards.konradgrsk.workers.dev/
 
 ## Description
 
@@ -40,7 +41,7 @@
 ### Installation
 
 ```bash
-git clone https://github.com/<owner>/<repo>.git
+git clone https://github.com/kontenty/ai-flashcards.git
 cd 10x-flashcards
 pnpm install
 ```
@@ -53,7 +54,6 @@ Create a `.env` in the root:
 SUPABASE_URL=your_supabase_url
 SUPABASE_ANON_KEY=your_supabase_anon_key
 OPEN_ROUTER_API_KEY=your_OPEN_ROUTER_API_KEY
-# or OPENAI_API_KEY=your_openai_api_key
 ```
 
 ### Running the App
@@ -62,7 +62,7 @@ OPEN_ROUTER_API_KEY=your_OPEN_ROUTER_API_KEY
 pnpm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) in your browser.
+Open [http://localhost:4321](http://localhost:4321) in your browser.
 
 ## Available Scripts
 
@@ -96,14 +96,10 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ## Project Status
 
-- **Version:** 0.0.1
+- **Version:** 0.1.0
 - **Status:** MVP in active development
 - **Metrics Tracked:**
   - AI flashcard acceptance rate
   - Percentage of flashcards generated via AI
   - Monthly active users
   - Average AI generation latency and usage
-
-## License
-
-This project is currently unlicensed. Please add a `LICENSE` file to specify terms.
