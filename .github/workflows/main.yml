@@ -66,7 +66,8 @@ jobs:
         name: Copy assets ignore into dist
         run: cp public/.assetsignore dist/.assetsignore
         shell: bash
-      - name: Publish to Cloudflare Workers
+      - if: steps.changed.outputs.src_files == 'true'
+        name: Publish to Cloudflare Workers
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
