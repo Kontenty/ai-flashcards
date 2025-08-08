@@ -49,17 +49,21 @@ jobs:
     needs: unit-test
     if: ${{ always() && needs.unit-test.result == 'success' }}
     environment: production
-    permissions:
-      contents: read
-      deployments: write
     steps:
+      - uses: dorny/paths-filter@v3
+        id: changed
+        with:
+          filters: |
+            src_files:
+              - 'src/**'
       - name: Checkout repository
         uses: actions/checkout@v4
       - name: Common setup
         uses: ./.github/actions/common-setup
       - name: Build production
         run: pnpm run build
-      - name: Copy assets ignore into dist
+      - if: steps.changed.outputs.src_files == 'true'
+        name: Copy assets ignore into dist
         run: cp public/.assetsignore dist/.assetsignore
         shell: bash
       - name: Publish to Cloudflare Workers
@@ -67,4 +71,3 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          githubToken: ${{ secrets.GITHUB_TOKEN }}

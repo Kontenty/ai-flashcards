@@ -40,6 +40,9 @@ export default defineConfig({
     resolve: {
       alias: config[environment].alias,
     },
+    ssr: {
+      external: ["crypto", "node:crypto", "node:path", "node:fs/promises", "node:url"],
+    },
   },
   adapter: config[environment].adapter,
 });
