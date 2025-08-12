@@ -1,11 +1,59 @@
 ---
-import Welcome from "@/components/Welcome.astro";
 import Layout from "@/layouts/Layout.astro";
-
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
 ---
 
-<Layout>
-	<Welcome />
+<Layout title="10x Flashcards – AI-powered learning with SM-2">
+  <section class="mx-auto max-w-3xl text-center space-y-6">
+    <h1 class="text-4xl font-bold tracking-tight">10x Flashcards</h1>
+    <p class="text-lg text-muted-foreground">
+      Twórz wysokiej jakości fiszki do nauki szybciej. Generuj sugestie za pomocą sztucznej inteligencji na podstawie wklejonego
+tekstu, dopracowuj je ręcznie i opanuj materiał, korzystając z powtórek w odstępach czasu z algorytmem SM‑2
+. Utrzymuj porządek dzięki tagom i monitoruj postępy dzięki wbudowanym statystykom.
+    </p>
+    <div class="flex items-center justify-center gap-4">
+      <a href="/auth/login" class="inline-flex items-center rounded-md bg-primary px-5 py-3 text-primary-foreground font-medium hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+        Zaloguj się
+      </a>
+      <a href="/auth/register" class="inline-flex items-center rounded-md border border-input bg-background px-5 py-3 font-medium hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+        Zarejestruj się
+      </a>
+    </div>
+  </section>
+
+  <section class="mx-auto mt-12 grid max-w-5xl gap-6 md:grid-cols-2">
+    <div class="rounded-lg border bg-card p-6 text-card-foreground">
+      <h2 class="text-xl font-semibold">Generowanie fiszek z AI</h2>
+      <p class="mt-2 text-muted-foreground">
+        Wklej do 5000 znaków tekstu i pozwól AI sugerować fiszki, które możesz zaakceptować lub edytować
+        przed zapisaniem.
+      </p>
+      <p class="mt-2 text-muted-foreground text-sm">Ograniczenia: front ≤ 200 znaków, back ≤ 500 znaków.</p>
+    </div>
+    <div class="rounded-lg border bg-card p-6 text-card-foreground">
+      <h2 class="text-xl font-semibold">Tworzenie i edycja ręczna</h2>
+      <p class="mt-2 text-muted-foreground">
+        Dodawaj, edytuj i usuwaj własne fiszki z walidacją i opcjonalnymi tagami dla lepszego
+        organizowania.
+      </p>
+    </div>
+    <div class="rounded-lg border bg-card p-6 text-card-foreground">
+      <h2 class="text-xl font-semibold">Powtórki w odstępach czasu (SM‑2)</h2>
+      <p class="mt-2 text-muted-foreground">
+        Przeglądaj fiszki za pomocą zweryfikowanego algorytmu SM‑2. Oceń swoją pamięć od 0 do 5, aby zaplanować następne
+        optymalne powtórki.
+      </p>
+    </div>
+    <div class="rounded-lg border bg-card p-6 text-card-foreground">
+      <h2 class="text-xl font-semibold">Tagi i statystyki wydajności</h2>
+      <p class="mt-2 text-muted-foreground">
+        Zarządzaj własnymi tagami i śledź wydajność, taką jak liczba fiszek per tag i dokładność powtórek w czasie.
+      </p>
+    </div>
+  </section>
+
+  <section class="mx-auto max-w-3xl mt-12 text-center">
+    <p class="text-sm text-muted-foreground">
+      Proste konta z wymaganym zgłoszeniem do RODO. Brak udostępniania, importów ani zewnętrznych integracji w MVP.
+    </p>
+  </section>
 </Layout>
